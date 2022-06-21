@@ -1,0 +1,405 @@
+img {
+  width: 100%;
+}
+.ant-form-item-label > label {
+  color: #fff;
+}
+.index-container {
+  background: #161616;
+  // background: #333;
+  color: #fff;
+  height: 100vh;
+
+  .wrapper {
+    width: 100%;
+    // border: 1px solid #f0f0f0;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    .header-content {
+      box-shadow: 0px 0px 4px 4px rgb(0 0 0 / 62%);
+      display: flex;
+      justify-content: space-between;
+      height: 90px;
+      align-items: center;
+      padding: 0 20px;
+      .logo {
+        width: 220px;
+      }
+      .btns {
+        display: flex;
+        align-items: center;
+        button {
+          margin: 0 10px;
+          &.connect-wallet {
+            background: #fff;
+            height: 40px;
+            border-radius: 40px;
+          }
+
+          &.create {
+            background: none;
+            height: 40px;
+            border-radius: 40px;
+            border: none;
+            color: #fff;
+            &:hover {
+              color: #40a9ff;
+            }
+          }
+        }
+        .use-info {
+          width: 50px;
+          height: 50px;
+          cursor: pointer;
+          img {
+            border-radius: 100%;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+        }
+      }
+    }
+    .main {
+      flex: 1;
+      width: 100%;
+      margin: auto;
+      overflow: auto;
+      padding-top: 30px;
+      .main-wrapper {
+        width: 1000px;
+        margin: auto;
+        .connect-walllet-content {
+          padding-top: 26vh;
+          margin: auto;
+          display: flex;
+          align-items: center;
+          width: 100%;
+          flex-direction: column;
+          color: #fff;
+          h1,
+          h3 {
+            color: #fff;
+          }
+          button {
+            margin-top: 20px;
+            background: #fff;
+            height: 40px;
+            border-radius: 40px;
+            width: 142px;
+          }
+        }
+      }
+      .ant-tabs-tab .ant-tabs-tab-btn {
+        color: #fff;
+      }
+      .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+        color: #1890ff;
+      }
+    }
+  }
+}
+
+.nft-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 10px;
+  .empty-data-content {
+    width: 100%;
+    height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .ant-empty-description {
+      color: #fff;
+    }
+  }
+  .nft-item {
+    width: 300px;
+    // height: 600px;
+    color: #fff;
+    padding: 12px;
+    box-shadow: 0px 0px 4px 4px rgb(0 0 0 / 62%);
+    margin: 13px;
+    border-radius: 8px;
+    background: #171717;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    transform: scale(1);
+    &:hover {
+      transform: scale(1.03);
+      box-shadow: 0px 0px 10px 10px rgb(0 0 0 / 70%);
+    }
+
+    .img {
+      width: 100%;
+      height: 276px;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      img {
+        object-fit: cover;
+
+        width: 100%;
+        height: 100%;
+      }
+    }
+    .info {
+      .item-row1 {
+        height: auto;
+        color: #fff;
+        text-align: left;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: left;
+        justify-content: flex-start;
+        line-height: 30px;
+        margin: 10px 0;
+        margin-bottom: 0;
+        font-weight: bold;
+      }
+      .item-row-symbol {
+        color: #e42575;
+        font-size: 14px;
+        line-height: 30px;
+      }
+      .item-row2 {
+        display: flex;
+        align-items: center;
+        .left {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          svg {
+            margin-right: 3px;
+          }
+        }
+        .right {
+          display: flex;
+          .btn {
+            background: #fff;
+            margin-left: 10px;
+            height: 34px;
+            border-radius: 34px;
+            padding: 0 18px;
+          }
+        }
+      }
+    }
+  }
+}
+
+.mint-nft-content {
+  padding-top: 40px;
+  .attributes-row {
+    display: flex;
+    justify-content: space-between;
+    .delete-btn {
+      padding-top: 11px;
+      position: absolute;
+      right: -30px;
+      top: 0;
+    }
+  }
+  .attributes-content {
+    & > .ant-form-item:nth-of-type(1) {
+      margin-bottom: 0;
+    }
+  }
+  .mint-submit-btn {
+    // right: 50px;
+    .ant-form-item-control-input-content {
+      display: flex;
+      justify-content: center;
+    }
+  }
+}
+
+.white-theme-form {
+  .ant-form-item-label > label {
+    color: #333;
+  }
+}
+
+.user-menu-content {
+  width: 260px;
+  * {
+    color: #fff;
+  }
+  .ant-popover-arrow {
+    .ant-popover-arrow-content {
+      &:before {
+        background: #120c18;
+      }
+    }
+  }
+  .ant-popover-inner {
+    background: #120c18;
+  }
+  .ant-popover-inner-content {
+    padding: 20px 0px;
+    padding-bottom: 0;
+  }
+
+  .solBalance {
+    font-weight: bold;
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 10px;
+  }
+
+  .menu-list {
+    padding: 0;
+    .user-info {
+      padding: 0 20px;
+      display: flex;
+      padding-top: 20px;
+      justify-content: center;
+      justify-content: flex-start;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(36, 24, 47, 1);
+      .left {
+        margin-right: 20px;
+        display: flex;
+        align-items: center;
+        img {
+          width: 40px;
+          border-radius: 100%;
+          overflow: hidden;
+        }
+      }
+    }
+    .balance-content {
+      border-bottom: 1px solid rgba(36, 24, 47, 1);
+      > .main-wallect,
+      .bidding-wallect {
+        padding: 0 20px;
+        margin: 16px 0;
+        display: flex;
+        justify-content: flex-start;
+        .left {
+          margin-right: 14px;
+          width: 40px;
+          height: 40px;
+          background: #24192f;
+          border-radius: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          img {
+            width: 24px;
+          }
+        }
+      }
+      .bidding-wallect {
+        .right {
+          flex: 1;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          .o-btn {
+            cursor: pointer;
+            width: 34px;
+            height: 34px;
+            border-radius: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            img {
+              width: 25px;
+            }
+            &:hover {
+              background: rgba(36, 24, 47, 1);
+            }
+          }
+        }
+      }
+      .withdraw-wallet {
+        line-height: 50px;
+        padding: 0 20px;
+        transition: all 0.2s;
+        height: 0;
+        overflow: hidden;
+        background: #1c1326;
+        cursor: pointer;
+        &:hover {
+          color: #fff;
+          background: rgb(36, 24, 47);
+        }
+        &.activate {
+          height: 50px;
+        }
+      }
+    }
+    .switch-content {
+      padding: 0 20px;
+      border-bottom: 1px solid rgba(36, 24, 47, 1);
+      .title {
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        line-height: 60px;
+        height: 60px;
+        &:hover {
+          color: #333;
+          // font-weight: bold;
+        }
+        .arrow-down-icon {
+          width: 14px;
+          img {
+            width: 100%;
+          }
+        }
+      }
+      .sub-list {
+        height: 0;
+        overflow: hidden;
+        transition: all 0.2s;
+        &.unfold {
+          height: 130px;
+        }
+        .sub-item {
+          line-height: 40px;
+          height: 40px;
+          cursor: pointer;
+          padding: 0 16px;
+          color: #a0a0a0;
+          &:hover,
+          &.activate {
+            background: rgb(36, 24, 47);
+            color: #fff;
+          }
+        }
+      }
+    }
+    .disconnect-content {
+      padding: 0 20px;
+      width: 100%;
+      cursor: pointer;
+      line-height: 60px;
+      height: 60px;
+      &:hover {
+        background: rgb(36, 24, 47);
+      }
+    }
+  }
+}
+
+.ant-upload-list {
+  .ant-upload-list-item {
+    background: #fff;
+    &:hover {
+      background: #f0f0f0;
+    }
+  }
+}
+
+.img-loading-content {
+  .ant-spin-blur {
+    opacity: 1;
+  }
+}

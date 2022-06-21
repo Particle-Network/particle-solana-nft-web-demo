@@ -1,0 +1,211 @@
+import React, { useEffect, useState } from 'react';
+import { Button, Popover, message } from 'antd';
+import { connectWallet, isLogin as isLoginHandle, getUserInfo, logout } from '@/utils/index';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import {
+  setUserInfo,
+  setSpinning,
+  selecteIsLogin,
+  setLogin,
+  selectUserInfo,
+  selecteChainId,
+  setChainId,
+} from '@/store/nftSlice';
+import { getBalance, withdrawWSOLAccount, CHAIN_ID } from '@/apis/index';
+
+const Header = (props: any) => {
+  const dispatch = useAppDispatch();
+
+  const isLogin = useAppSelector(selecteIsLogin);
+
+  const userInfo = useAppSelector(selectUserInfo);
+
+  const chainId = useAppSelector(selecteChainId);
+
+  const [withdrawLoading, setWithdrawLoading] = useState(false);
+
+  const [unfold, setUnfold] = useState(false);
+
+  const [withdrawShow, setWithdrawShow] = useState(false);
+
+  const [chainList] = useState(
+    Object.keys(CHAIN_ID)
+      .filter((key: any) => parseInt(CHAIN_ID[key]))
+      .map((key: any) => ({ label: key, value: CHAIN_ID[key] }))
+  );
+
+  const userMenuContent = (
+    <div>
+      <div className="menu-list">
+        <div className="user-info">
+          <div className="left">
+            <img src="/user_default.png" alt="" />
+          </div>
+          <div className="right">
+            <div className="userName">Normie</div>
+            <div className="address">
+              {(userInfo.address || '').substring(0, 9) +
+                '...' +
+                (userInfo.address || '').substring((userInfo.address || '').length - 9)}
+            </div>
+          </div>
+        </div>
+        <div className="balance-content">
+          <div className="main-wallect">
+            <div className="left">
+              <img src="/icon1.svg" alt="" />
+            </div>
+            <div className="right">
+              <div className="name">Main Wallet</div>
+              <div className="balance">{userInfo.balance}◎</div>
+            </div>
+          </div>
+          <div className="bidding-wallect">
+            <div className="left">
+              <img src="/icon1.svg" alt="" />
+            </div>
+            <div className="right">
+              <div className="wrapper">
+                <div className="name">Bidding Wallet</div>
+                <div className="balance">{userInfo.wsolBalance}◎</div>
+              </div>
+              <div
+                className="o-btn"
+                onClick={() => {
+                  setWithdrawShow((val) => {
+                    return !val;
+                  });
+                }}
+              >
+                <img src="/icon3.svg" alt="" />
+              </div>
+            </div>
+          </div>
+          <div
+            className={'withdraw-wallet ' + (withdrawShow ? 'activate' : '')}
+            onClick={() => {
+              if (!withdrawLoading) {
+                setWithdrawLoading(true);
+                withdrawWSOLAccount(window.particle)
+                  .then((res) => {
+                    setWithdrawLoading(false);
+                    if (res.error) {
+                      throw new Error(res.error);
+                    } else {
+                      message.success('success');
+                      setWithdrawShow(false);
+                      if (props.getBalanceHandle) {
+                        props.getBalanceHandle();
+                      }
+                    }
+                  })
+                  .catch((error: Error) => {
+                    setWithdrawLoading(false);
+                    message.error(error.message);
+                  });
+              }
+            }}
+          >
+            <span>Withdraw to main wallet</span>
+          </div>
+        </div>
+        <div className="switch-content">
+          <div
+            className="title"
+            onClick={() => {
+              setUnfold((val) => {
+                return !val;
+              });
+            }}
+          >
+            <span>Switch Chain</span>
+            <i className="arrow-down-icon">
+              <img src="/arrow-down.svg" alt="" />
+            </i>
+          </div>
+          <div className={'sub-list ' + (!!unfold ? 'unfold' : '')}>
+            {chainList.map((item, index) => {
+              return (
+                <div
+                  key={index}
+                  className={'sub-item ' + (parseInt(item.value) == chainId ? 'activate' : '')}
+                  onClick={() => {
+                    dispatch(setChainId(parseInt(item.value)));
+                    location.reload();
+                  }}
+                >
+                  {item.label}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="disconnect-content">
+          <a
+            onClick={() => {
+              logout().then(() => {
+                dispatch(setLogin(isLoginHandle()));
+                dispatch(setUserInfo(getUserInfo()));
+                localStorage.removeItem('chainId');
+              });
+            }}
+          >
+            Disconnect
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+
+  useEffect(() => {
+    dispatch(setLogin(isLoginHandle()));
+    dispatch(setUserInfo(getUserInfo()));
+  }, []);
+
+  return (
+    <div className="header-content">
+      <div className="left logo">
+        <img src="https://particle.network/images/logo-top.png" alt="" />
+      </div>
+      <div className="right btns">
+        {isLogin ? (
+          <Popover
+            placement="topLeft"
+            content={userMenuContent}
+            trigger="hover"
+            overlayClassName="user-menu-content"
+            defaultVisible={false}
+            // visible={true}
+          >
+            <div className="use-info">
+              <img src="/user_default.png" alt="" />
+            </div>
+          </Popover>
+        ) : (
+          <Button
+            className="connect-wallet"
+            size="large"
+            onClick={() => {
+              dispatch(setSpinning(true));
+              connectWallet()
+                .then(() => {
+                  dispatch(setLogin(isLoginHandle()));
+                  dispatch(setUserInfo(getUserInfo()));
+                  dispatch(setSpinning(false));
+                })
+                .catch((error: Error) => {
+                  dispatch(setLogin(isLoginHandle()));
+                  dispatch(setSpinning(false));
+                  message.error(error.message);
+                });
+            }}
+          >
+            Connect Wallet
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Header;
