@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Tabs, Spin, Button, message } from 'antd';
+import { Tabs, Spin, Button, message, Badge } from 'antd';
 import Header from './modules/header';
 import NftList from './modules/nftList';
 import MintNFT from './modules/mintNFT';
@@ -33,7 +33,7 @@ import { NftListType, UserInfoProp, NftData } from '@/types/types.d';
 const Index = () => {
   const dispatch = useAppDispatch();
 
-  const [activeKey, setActiveKey] = useState<NftListType>(NftListType.MyNft);
+  const [activeKey, setActiveKey] = useState<NftListType>(NftListType.MintNft);
 
   const isLogin = useAppSelector(selecteIsLogin);
 
@@ -138,7 +138,7 @@ const Index = () => {
       getRetryTransactions(window.particle)
         .then((list: any) => {
           list = list.map((item: any) => {
-            let { address, data, transactions, type, uuid } = item;
+            const { address, data, transactions, type, uuid } = item;
             return {
               address,
               ...data,
@@ -157,6 +157,31 @@ const Index = () => {
         });
     }
   };
+
+  const [settleCount, setSettleCount] = useState(0);
+
+  const getSettleCountHandle = () => {
+    getSettles(window.particle)
+      .then((list: any) => {
+        setSettleCount(list.length);
+      })
+      .catch((error: Error) => {
+        console.log(error);
+      });
+  };
+
+  const settlesTab = (
+    <div className="seetles-tab-content">
+      <span>Settles</span>
+      {settleCount ? (
+        <div className="tab-badge-content">
+          <Badge count={settleCount} size="small" />
+        </div>
+      ) : (
+        ''
+      )}
+    </div>
+  );
 
   const getBalanceHandle = () => {
     getBalance(window.particle)
@@ -208,7 +233,11 @@ const Index = () => {
                 >
                   <Tabs.TabPane tab="Market" key={NftListType.Market}>
                     {activeKey == NftListType.Market ? (
-                      <NftList type={NftListType.Market} getNftListHandle={getNftListHandle} />
+                      <NftList
+                        type={NftListType.Market}
+                        getNftListHandle={getNftListHandle}
+                        getSettleCountHandle={getSettleCountHandle}
+                      />
                     ) : (
                       ''
                     )}
@@ -227,11 +256,12 @@ const Index = () => {
                       ''
                     )}
                   </Tabs.TabPane>
-                  <Tabs.TabPane tab="Settles" key={NftListType.SettleAccounts}>
+                  <Tabs.TabPane tab={settlesTab} key={NftListType.SettleAccounts}>
                     {activeKey == NftListType.SettleAccounts ? (
                       <NftList
                         type={NftListType.SettleAccounts}
                         getNftListHandle={getNftListHandle}
+                        getSettleCountHandle={getSettleCountHandle}
                       />
                     ) : (
                       ''
@@ -253,7 +283,7 @@ const Index = () => {
                 </Tabs>
               ) : (
                 <div className="connect-walllet-content">
-                  <h1>Connect your wallet to view your feed</h1>
+                  <h1>Connect your wallet to view your NFT</h1>
                   <Button
                     onClick={() => {
                       dispatch(setSpinning(true));
@@ -266,7 +296,9 @@ const Index = () => {
                         .catch((error: Error) => {
                           dispatch(setLogin(isLoginHandle()));
                           dispatch(setSpinning(false));
-                          message.error(error.message);
+                          if (error.message) {
+                            message.error(error.message);
+                          }
                         });
                     }}
                   >

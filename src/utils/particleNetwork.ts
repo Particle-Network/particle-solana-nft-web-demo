@@ -23,8 +23,8 @@ if (!isServer()) {
     // chainId: 42,
     chainName: 'solana',
     chainId,
-    rpcUrl: process.env.NEXT_PUBLIC_BASE_URL as string,
-    authUrl: process.env.NEXT_PUBLIC_AUTH_URL as string,
+    rpcUrl: (process.env.NEXT_PUBLIC_BASE_URL || 'https://api.app-link.network') as string,
+    authUrl: (process.env.NEXT_PUBLIC_AUTH_URL || 'https://auth.app-link.network') as string,
   });
 
   // examples https://github.com/solana-labs/solana/blob/master/web3.js/examples/get_account_info.js
@@ -45,7 +45,11 @@ export const connectWallet = () => {
     .then(() => {
       return Promise.all([
         checkHasInitializedStore(window.particle),
-        checkHasSetWhitelistedCreator(window.particle, window.particle.auth.userInfo()!.address),
+        checkHasSetWhitelistedCreator(
+          window.particle,
+          window.particle.auth.userInfo().wallets.filter((w) => w.chain_name === 'solana')[0]
+            .public_address
+        ),
       ]);
     })
     .then((res: any) => {

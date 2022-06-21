@@ -2,6 +2,19 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { isServer } from '@/utils/index';
 import type { AppState, AppThunk } from '@/store/index';
 import { NftListType, UserInfoProp, NftData } from '@/types/types.d';
+// @ts-ignore
+import { createIcon } from '@download/blockies';
+import { isLogin as isLoginHandle } from '@/utils/index';
+
+const createUserImg = (address: string) => {
+  return createIcon({
+    seed: address,
+    // color: '#d242ca',
+    bgcolor: '#fff',
+    size: 20,
+    scale: 5,
+  }).toDataURL('image/png');
+};
 
 export interface NftImageData {
   [key: string]: string;
@@ -18,8 +31,9 @@ export interface NftState {
 
 const initialState: NftState = {
   userInfo: {
+    userImage: isServer() ? '' : localStorage.getItem('userImage') || '',
     address: '',
-    solBalance: 0,
+    wsolBalance: 0,
     balance: 0,
   },
   chainId: isServer() ? -1 : parseInt(localStorage.getItem('chainId') || '103'),
@@ -37,10 +51,27 @@ export const nftSlice = createSlice({
       state.nftList = action.payload;
     },
     setUserInfo(state, action: PayloadAction<UserInfoProp>) {
-      state.userInfo = {
+      const userInfo = {
         ...state.userInfo,
         ...action.payload,
       };
+
+      if (!userInfo.userImage) {
+        userInfo.userImage = createUserImg(userInfo.address as string);
+        localStorage.setItem('userImage', userInfo.userImage);
+      }
+
+      if (!userInfo.address && isLoginHandle()) {
+        try {
+          userInfo.address = window.particle.auth
+            .userInfo()
+            .wallets.filter((w) => w.chain_name === 'solana')[0].public_address;
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      state.userInfo = userInfo;
     },
     setSpinning(state, action: PayloadAction<boolean>) {
       state.spinning = action.payload;

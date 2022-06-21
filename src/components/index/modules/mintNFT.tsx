@@ -1,5 +1,10 @@
-import { MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
-import { Button, Form, Input, Slider, Row, Col, Space, message, Upload } from 'antd';
+import {
+  MinusCircleOutlined,
+  PlusOutlined,
+  UploadOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons';
+import { Button, Form, Input, Slider, Row, Col, Space, message, Upload, Tooltip } from 'antd';
 import { useEffect, useImperativeHandle, useRef, useState, forwardRef } from 'react';
 import { mintNFT as addMintNFT, updateNFT } from '@/apis/index';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
@@ -28,6 +33,9 @@ const MintNFT = forwardRef((props: Props, ref) => {
     const values = form.getFieldsValue();
     console.log(values);
     const config = { ...values };
+    if (config.seller_fee_basis_points) {
+      config.seller_fee_basis_points = config.seller_fee_basis_points * 100;
+    }
     delete config.image;
     let res = null;
     if (formType == 'edit') {
@@ -74,7 +82,9 @@ const MintNFT = forwardRef((props: Props, ref) => {
       image: [image],
       attributes,
       description,
-      seller_fee_basis_points,
+      seller_fee_basis_points: seller_fee_basis_points
+        ? seller_fee_basis_points / 100
+        : seller_fee_basis_points,
       symbol,
     });
     setFileList([
@@ -108,7 +118,7 @@ const MintNFT = forwardRef((props: Props, ref) => {
   useEffect(() => {
     form.setFieldsValue({
       name: null,
-      seller_fee_basis_points: 1000,
+      seller_fee_basis_points: 10,
       image: [],
       attributes: [
         {
@@ -162,9 +172,18 @@ const MintNFT = forwardRef((props: Props, ref) => {
         <Form.Item label="Description" name="description">
           <Input placeholder="Please input description" />
         </Form.Item>
-
-        <Form.Item label="Fee Basis Points" name="seller_fee_basis_points">
-          <Slider max={10000} disabled={formType == 'edit'} />
+        <Form.Item
+          label={
+            <div className="fee-basis-points-label">
+              <span>Fee Basis Points</span>
+              <Tooltip placement="top" title="The royalties shared by the creators in basis points">
+                <QuestionCircleOutlined />
+              </Tooltip>
+            </div>
+          }
+          name="seller_fee_basis_points"
+        >
+          <Slider max={100} disabled={formType == 'edit'} />
         </Form.Item>
 
         <Form.Item

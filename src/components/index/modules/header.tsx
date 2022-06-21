@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Button, Popover, message } from 'antd';
 import { connectWallet, isLogin as isLoginHandle, getUserInfo, logout } from '@/utils/index';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { CopyOutlined } from '@ant-design/icons';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+
 import {
   setUserInfo,
   setSpinning,
@@ -11,6 +14,7 @@ import {
   selecteChainId,
   setChainId,
 } from '@/store/nftSlice';
+
 import { getBalance, withdrawWSOLAccount, CHAIN_ID } from '@/apis/index';
 
 const Header = (props: any) => {
@@ -38,16 +42,31 @@ const Header = (props: any) => {
     <div>
       <div className="menu-list">
         <div className="user-info">
-          <div className="left">
-            <img src="/user_default.png" alt="" />
-          </div>
-          <div className="right">
-            <div className="userName">Normie</div>
-            <div className="address">
-              {(userInfo.address || '').substring(0, 9) +
-                '...' +
-                (userInfo.address || '').substring((userInfo.address || '').length - 9)}
+          <div className="wrapper">
+            <div className="left">
+              <img src={userInfo.userImage} alt="" />
             </div>
+            <div className="right">
+              <div className="userName">Normie</div>
+              <div className="address">
+                <span>
+                  {(userInfo.address || '').substring(0, 6) +
+                    '...' +
+                    (userInfo.address || '').substring((userInfo.address || '').length - 6)}
+                </span>
+                <CopyToClipboard
+                  text={userInfo.address}
+                  onCopy={() => {
+                    message.success('Copy Successfully！');
+                  }}
+                >
+                  <CopyOutlined />
+                </CopyToClipboard>
+              </div>
+            </div>
+          </div>
+          <div className="network-name">
+            NetWork：{(chainList.find((item) => parseInt(item.value) == chainId) || {}).label}
           </div>
         </div>
         <div className="balance-content">
@@ -118,12 +137,12 @@ const Header = (props: any) => {
               });
             }}
           >
-            <span>Switch Chain</span>
+            <span>Switch Network</span>
             <i className="arrow-down-icon">
               <img src="/arrow-down.svg" alt="" />
             </i>
           </div>
-          <div className={'sub-list ' + (!!unfold ? 'unfold' : '')}>
+          <div className={'sub-list ' + (unfold ? 'unfold' : '')}>
             {chainList.map((item, index) => {
               return (
                 <div
@@ -140,18 +159,17 @@ const Header = (props: any) => {
             })}
           </div>
         </div>
-        <div className="disconnect-content">
-          <a
-            onClick={() => {
-              logout().then(() => {
-                dispatch(setLogin(isLoginHandle()));
-                dispatch(setUserInfo(getUserInfo()));
-                localStorage.removeItem('chainId');
-              });
-            }}
-          >
-            Disconnect
-          </a>
+        <div
+          className="disconnect-content"
+          onClick={() => {
+            logout().then(() => {
+              dispatch(setLogin(isLoginHandle()));
+              dispatch(setUserInfo(getUserInfo()));
+              localStorage.removeItem('chainId');
+            });
+          }}
+        >
+          Disconnect
         </div>
       </div>
     </div>
@@ -160,27 +178,35 @@ const Header = (props: any) => {
   useEffect(() => {
     dispatch(setLogin(isLoginHandle()));
     dispatch(setUserInfo(getUserInfo()));
+    // console.log(createUserImg());
   }, []);
 
   return (
     <div className="header-content">
       <div className="left logo">
-        <img src="https://particle.network/images/logo-top.png" alt="" />
+        <a href="https://particle.network/">
+          <img src="https://particle.network/images/logo-top.png" alt="" />
+        </a>
       </div>
       <div className="right btns">
         {isLogin ? (
-          <Popover
-            placement="topLeft"
-            content={userMenuContent}
-            trigger="hover"
-            overlayClassName="user-menu-content"
-            defaultVisible={false}
-            // visible={true}
-          >
-            <div className="use-info">
-              <img src="/user_default.png" alt="" />
-            </div>
-          </Popover>
+          <>
+            {/* <div className="network-name">
+              NetWork：{(chainList.find(item => parseInt(item.value) == chainId) || {}).label}
+            </div> */}
+            <Popover
+              placement="topLeft"
+              content={userMenuContent}
+              trigger="hover"
+              overlayClassName="user-menu-content"
+              defaultVisible={false}
+              // visible={true}
+            >
+              <div className="use-info">
+                <img src={userInfo.userImage} alt="" />
+              </div>
+            </Popover>
+          </>
         ) : (
           <Button
             className="connect-wallet"
@@ -196,7 +222,9 @@ const Header = (props: any) => {
                 .catch((error: Error) => {
                   dispatch(setLogin(isLoginHandle()));
                   dispatch(setSpinning(false));
-                  message.error(error.message);
+                  if (error.message) {
+                    message.error(error.message);
+                  }
                 });
             }}
           >

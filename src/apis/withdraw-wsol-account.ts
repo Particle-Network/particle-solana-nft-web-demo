@@ -9,7 +9,9 @@ import { getAssociatedTokenAddress, NATIVE_MINT } from '@particle/spl-token';
 export async function withdrawWSOLAccount(
   provider: ParticleNetwork
 ): Promise<IApiStandardResponse> {
-  const address = provider.auth.userInfo()!.address;
+  const address = provider.auth
+    .userInfo()
+    .wallets.filter((w) => w.chain_name === 'solana')[0].public_address;
   console.log(`withdrawWSOLAccount:${address}`);
 
   const wsolAta = await getAssociatedTokenAddress(NATIVE_MINT, new PublicKey(address));

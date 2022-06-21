@@ -19,7 +19,9 @@ export async function buyNFT(
   provider: ParticleNetwork,
   auctionManagerAddress: string
 ): Promise<IApiStandardResponse> {
-  const address = provider.auth.userInfo()!.address;
+  const address = provider.auth
+    .userInfo()
+    .wallets.filter((w) => w.chain_name === 'solana')[0].public_address;
   console.log(`buyNFT:${address}`, auctionManagerAddress);
 
   const auctionEntity = await marketDatabase.auctions
@@ -111,7 +113,9 @@ export async function buyNFT(
 }
 
 export async function afterBuyNFT(provider: ParticleNetwork, args: any) {
-  const address = provider.auth.userInfo()!.address;
+  const address = provider.auth
+    .userInfo()
+    .wallets.filter((w) => w.chain_name === 'solana')[0].public_address;
 
   await marketDatabase.auctions.where({ auctionManager: args.auctionManager }).delete();
   await tryAddOrUpdateNFT(address, args.nft);

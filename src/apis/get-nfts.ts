@@ -8,7 +8,9 @@ export async function getNFTs(
   provider: ParticleNetwork,
   useCache: boolean = true
 ): Promise<IApiStandardResponse> {
-  const address = provider.auth.userInfo()!.address;
+  const address = provider.auth
+    .userInfo()
+    .wallets.filter((w) => w.chain_name === 'solana')[0].public_address;
   console.log(`getNFTs:${address}`);
 
   if (!useCache) {

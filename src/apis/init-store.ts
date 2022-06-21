@@ -12,7 +12,9 @@ import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 export async function checkHasInitializedStore(
   provider: ParticleNetwork
 ): Promise<IApiStandardResponse> {
-  const address = provider.auth.userInfo()!.address;
+  const address = provider.auth
+    .userInfo()
+    .wallets.filter((w) => w.chain_name === 'solana')[0].public_address;
 
   const hasInitializedStore = localStorage.getItem(createKeyHasInitializedStore(address)) === '1';
   if (hasInitializedStore) {
@@ -39,7 +41,9 @@ export async function checkHasSetWhitelistedCreator(
   provider: ParticleNetwork,
   marketManagerAddress: string
 ): Promise<IApiStandardResponse> {
-  const address = provider.auth.userInfo()!.address;
+  const address = provider.auth
+    .userInfo()
+    .wallets.filter((w) => w.chain_name === 'solana')[0].public_address;
 
   const hasSetWhitelistedCreator =
     localStorage.getItem(createKeyHasSetWhitelistedCreator(address)) === '1';
@@ -67,7 +71,9 @@ export async function checkHasSetWhitelistedCreator(
 export async function initializStoreAndSetCreator(
   provider: ParticleNetwork
 ): Promise<IApiStandardResponse> {
-  const address = provider.auth.userInfo()!.address;
+  const address = provider.auth
+    .userInfo()
+    .wallets.filter((w) => w.chain_name === 'solana')[0].public_address;
 
   const balance = await connectionService.getConnection().getBalance(new PublicKey(address));
   if (balance < SOLANA_FEE_LAMPORTS_COST_PER_TRANSACTION) {

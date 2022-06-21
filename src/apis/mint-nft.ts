@@ -13,7 +13,9 @@ export async function mintNFT(
   config: any,
   fromData: FormData
 ): Promise<IApiStandardResponse> {
-  const address = provider.auth.userInfo()!.address;
+  const address = provider.auth
+    .userInfo()
+    .wallets.filter((w) => w.chain_name === 'solana')[0].public_address;
   console.log(`mintNFT:${address}`, config, fromData);
 
   const balance = await connectionService.getConnection().getBalance(new PublicKey(address));

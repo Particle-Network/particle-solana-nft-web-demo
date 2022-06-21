@@ -17,6 +17,7 @@ interface Props {
   address?: string;
   auctionManager?: string;
   getNftListHandle: () => void;
+  getSettleCountHandle: () => void;
   price?: string;
   uuid?: string;
 }
@@ -157,6 +158,9 @@ const NftItem = (props: Props) => {
                           throw new Error(res.error);
                         } else {
                           message.success('success');
+                          if (props.getSettleCountHandle) {
+                            props.getSettleCountHandle();
+                          }
                           if (props.getNftListHandle) {
                             props.getNftListHandle();
                           }
@@ -217,6 +221,9 @@ const NftItem = (props: Props) => {
                         if (res.error) {
                           throw new Error(res.error);
                         } else {
+                          if (props.getSettleCountHandle) {
+                            props.getSettleCountHandle();
+                          }
                           if (props.getNftListHandle) {
                             props.getNftListHandle();
                           }
@@ -302,6 +309,7 @@ const NftList = (props: any) => {
 
       <Modal
         title="Edit"
+        forceRender={true}
         visible={editModelVisible}
         onCancel={() => setEditModelVisible(false)}
         confirmLoading={editConfirmLoading}
@@ -337,13 +345,20 @@ const NftList = (props: any) => {
 
       <Modal
         title="Set Amount"
+        forceRender={true}
         visible={amountModelVisible}
         confirmLoading={onShelvesLoading}
         onCancel={() => setAmountModelVisible(false)}
         onOk={() => {
           setOnShelvesLoading(true);
           const { price } = onShelvesForm.getFieldsValue();
-          listNFT(window.particle, window.particle.auth.userInfo()!.address, activateMintId, price)
+          listNFT(
+            window.particle,
+            window.particle.auth.userInfo().wallets.filter((w) => w.chain_name === 'solana')[0]
+              .public_address,
+            activateMintId,
+            price
+          )
             .then((res) => {
               if (res.error) {
                 throw new Error(res.error);

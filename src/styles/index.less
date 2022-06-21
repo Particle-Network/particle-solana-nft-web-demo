@@ -24,6 +24,9 @@ img {
       height: 90px;
       align-items: center;
       padding: 0 20px;
+      .network-name {
+        padding-right: 20px;
+      }
       .logo {
         width: 220px;
       }
@@ -216,6 +219,17 @@ img {
       justify-content: center;
     }
   }
+
+  .fee-basis-points-label {
+    display: flex;
+    align-items: center;
+    > span {
+      margin-right: 10px;
+      &.anticon-question-circle {
+        cursor: pointer;
+      }
+    }
+  }
 }
 
 .white-theme-form {
@@ -228,6 +242,19 @@ img {
   width: 260px;
   * {
     color: #fff;
+  }
+  .address {
+    > span {
+      margin-right: 10px;
+      &.anticon-copy {
+        cursor: pointer;
+        &:hover {
+          svg {
+            fill: #40a9ff;
+          }
+        }
+      }
+    }
   }
   .ant-popover-arrow {
     .ant-popover-arrow-content {
@@ -255,21 +282,26 @@ img {
     padding: 0;
     .user-info {
       padding: 0 20px;
-      display: flex;
-      padding-top: 20px;
-      justify-content: center;
-      justify-content: flex-start;
-      padding-bottom: 20px;
       border-bottom: 1px solid rgba(36, 24, 47, 1);
-      .left {
-        margin-right: 20px;
+      .wrapper {
         display: flex;
-        align-items: center;
-        img {
-          width: 40px;
-          border-radius: 100%;
-          overflow: hidden;
+        padding-top: 20px;
+        justify-content: center;
+        justify-content: flex-start;
+        padding-bottom: 10px;
+        .left {
+          margin-right: 20px;
+          display: flex;
+          align-items: center;
+          img {
+            width: 40px;
+            border-radius: 100%;
+            overflow: hidden;
+          }
         }
+      }
+      .network-name {
+        padding: 10px 0;
       }
     }
     .balance-content {
@@ -401,5 +433,17 @@ img {
 .img-loading-content {
   .ant-spin-blur {
     opacity: 1;
+  }
+}
+
+.seetles-tab-content {
+  position: relative;
+  .tab-badge-content {
+    position: absolute;
+    top: -10px;
+    right: -16px;
+    .ant-badge-count {
+      box-shadow: 0 0 0 1px #ff4d4f;
+    }
   }
 }

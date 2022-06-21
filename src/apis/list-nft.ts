@@ -27,7 +27,9 @@ export async function listNFT(
   mintAddress: string,
   price: number
 ) {
-  const address = provider.auth.userInfo()!.address;
+  const address = provider.auth
+    .userInfo()
+    .wallets.filter((w) => w.chain_name === 'solana')[0].public_address;
   console.log(`listNFT:${address}`, mintAddress, price);
 
   const balance = await connectionService.getConnection().getBalance(new PublicKey(address));
@@ -113,7 +115,9 @@ export async function listNFT(
 }
 
 export async function afterListNFT(provider: ParticleNetwork, args: any) {
-  const address = provider.auth.userInfo()!.address;
+  const address = provider.auth
+    .userInfo()
+    .wallets.filter((w) => w.chain_name === 'solana')[0].public_address;
 
   await marketDatabase.nfts.where({ address, mint: args.mint }).delete();
 
@@ -148,7 +152,11 @@ export async function processTransactions(
         const transaction = Transaction.from(bs58.decode(transactions[index].serialized));
 
         const newTransaction = new Transaction().add(...transaction.instructions);
-        newTransaction.feePayer = new PublicKey(provider.auth.userInfo()!.address);
+        newTransaction.feePayer = new PublicKey(
+          provider.auth
+            .userInfo()
+            .wallets.filter((w) => w.chain_name === 'solana')[0].public_address
+        );
         newTransaction.recentBlockhash = blockhash;
 
         const signers = transactions[index].signers.map((s: string) =>

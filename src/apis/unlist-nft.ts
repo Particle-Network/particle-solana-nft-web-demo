@@ -14,7 +14,9 @@ export async function unlistNFT(
   provider: ParticleNetwork,
   auctionManagerAddress: string
 ): Promise<IApiStandardResponse> {
-  const address = provider.auth.userInfo()!.address;
+  const address = provider.auth
+    .userInfo()
+    .wallets.filter((w) => w.chain_name === 'solana')[0].public_address;
   console.log(`unlistNFT:${address}`, auctionManagerAddress);
 
   const balance = await connectionService.getConnection().getBalance(new PublicKey(address));

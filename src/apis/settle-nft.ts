@@ -9,7 +9,9 @@ export async function settleNFT(
   provider: ParticleNetwork,
   settleUuid: string
 ): Promise<IApiStandardResponse> {
-  const address = provider.auth.userInfo()!.address;
+  const address = provider.auth
+    .userInfo()
+    .wallets.filter((w) => w.chain_name === 'solana')[0].public_address;
   console.log(`settleNFT:${address}`, settleUuid);
 
   const settleEntity = await marketDatabase.settles.where({ uuid: settleUuid }).first();

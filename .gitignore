@@ -45,3 +45,4 @@ public/demo-theme.css
 yalc.lock
 
 tsconfig.tsbuildinfo
+dev_deploy.sh

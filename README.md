@@ -21,7 +21,7 @@ See it live on [https://web-nft-demo.particle.network](https://web-nft-demo.part
 
 ## 🔧 Run
 
-git clone the project and install the dependencies
+💿 git clone the project and install the dependencies
 
 ```bash
 git clone git@github.com:Particle-Network/particle-solana-nft-web-demo.git
@@ -29,9 +29,7 @@ cd particle-solana-nft-web-demo
 yarn install
 ```
 
-If you don't have a Particle Network account, please register on the [Particle Network Dashboard](https://dashboard.particle.network/), And create a project and an app.
-
-Set your particle network configuration in **.env**
+✏ Set your Particle Network configuration in **.env**. If you don't have a Particle Network account, please register on the [Particle Network Dashboard](https://dashboard.particle.network/), then create a project and an app.
 
 ```bash
 NEXT_PUBLIC_PROJECT_ID='Your Particle Network project id'
@@ -39,7 +37,7 @@ NEXT_PUBLIC_PROJECT_CLIENT_KEY='The client key of your project'
 NEXT_PUBLIC_PROJECT_APP_ID='The app id of your project'
 ```
 
-Finally, start the project.
+🚴‍♂️ Finally, start the project.
 
 ```bash
 yarn start
