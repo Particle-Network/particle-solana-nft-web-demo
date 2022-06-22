@@ -6,6 +6,7 @@ import { listNFT, unlistNFT, settleNFT, buyNFT } from '@/apis/index';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { selectNftImageData, selectNftList } from '@/store/nftSlice';
 import { Spin } from 'antd';
+import { getProviderSolanaAddress } from '@/apis/utils';
 
 interface Props {
   tabType: string;
@@ -324,7 +325,7 @@ const NftList = (props: any) => {
                 props.getNftListHandle();
               }
             })
-            .catch((err) => {
+            .catch((err: any) => {
               console.log(err);
               setEditConfirmLoading(false);
             });
@@ -354,8 +355,7 @@ const NftList = (props: any) => {
           const { price } = onShelvesForm.getFieldsValue();
           listNFT(
             window.particle,
-            window.particle.auth.userInfo().wallets.filter((w) => w.chain_name === 'solana')[0]
-              .public_address,
+            getProviderSolanaAddress(window.particle),
             activateMintId,
             price
           )

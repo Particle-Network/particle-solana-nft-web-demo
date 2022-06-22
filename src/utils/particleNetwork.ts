@@ -8,6 +8,7 @@ import {
   checkHasSetWhitelistedCreator,
   initializStoreAndSetCreator,
 } from '@/apis/index';
+import { getProviderSolanaAddress } from '@/apis/utils';
 
 let pn: any = null;
 
@@ -46,8 +47,7 @@ export const connectWallet = () => {
         checkHasInitializedStore(window.particle),
         checkHasSetWhitelistedCreator(
           window.particle,
-          window.particle.auth.userInfo().wallets.filter((w) => w.chain_name === 'solana')[0]
-            .public_address
+          getProviderSolanaAddress(window.particle),
         ),
       ]);
     })
