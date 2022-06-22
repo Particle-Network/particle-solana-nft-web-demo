@@ -1,30 +1,19 @@
 import { bs58 } from '@project-serum/anchor/dist/cjs/utils/bytes';
-import { createApiStandardResponse, signAllTransactions } from './utils';
-import {
-  IApiStandardResponse,
-  RPC_METHOD,
-  SOLANA_FEE_LAMPORTS_COST_PER_TRANSACTION,
-} from './common-types';
+import { createApiStandardResponse, getProviderSolanaAddress, signAllTransactions } from './utils';
+import { IApiStandardResponse, RPC_METHOD, SOLANA_FEE_LAMPORTS_COST_PER_TRANSACTION } from './common-types';
 import connectionService from './connection-service';
 import { ParticleNetwork } from '@particle-network/provider';
 import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 
-export async function checkHasInitializedStore(
-  provider: ParticleNetwork
-): Promise<IApiStandardResponse> {
-  const address = provider.auth
-    .userInfo()
-    .wallets.filter((w) => w.chain_name === 'solana')[0].public_address;
+export async function checkHasInitializedStore(provider: ParticleNetwork): Promise<IApiStandardResponse> {
+  const address = getProviderSolanaAddress(provider);
 
   const hasInitializedStore = localStorage.getItem(createKeyHasInitializedStore(address)) === '1';
   if (hasInitializedStore) {
     return createApiStandardResponse(null, true);
   }
 
-  const response = await connectionService.rpcRequest(
-    RPC_METHOD.NFT_CHECK_STORE_HAS_INITIALIZED,
-    address
-  );
+  const response = await connectionService.rpcRequest(RPC_METHOD.NFT_CHECK_STORE_HAS_INITIALIZED, address);
   if (response.error) {
     return createApiStandardResponse(response.error);
   }
@@ -37,25 +26,15 @@ export async function checkHasInitializedStore(
   return createApiStandardResponse(null, hasInitialized);
 }
 
-export async function checkHasSetWhitelistedCreator(
-  provider: ParticleNetwork,
-  marketManagerAddress: string
-): Promise<IApiStandardResponse> {
-  const address = provider.auth
-    .userInfo()
-    .wallets.filter((w) => w.chain_name === 'solana')[0].public_address;
+export async function checkHasSetWhitelistedCreator(provider: ParticleNetwork, marketManagerAddress: string): Promise<IApiStandardResponse> {
+  const address = getProviderSolanaAddress(provider);
 
-  const hasSetWhitelistedCreator =
-    localStorage.getItem(createKeyHasSetWhitelistedCreator(address)) === '1';
+  const hasSetWhitelistedCreator = localStorage.getItem(createKeyHasSetWhitelistedCreator(address)) === '1';
   if (hasSetWhitelistedCreator) {
     return createApiStandardResponse(null, true);
   }
 
-  const response = await connectionService.rpcRequest(
-    RPC_METHOD.NFT_CHECK_STORE_CREATOR_IS_ACTIVATED,
-    marketManagerAddress,
-    address
-  );
+  const response = await connectionService.rpcRequest(RPC_METHOD.NFT_CHECK_STORE_CREATOR_IS_ACTIVATED, marketManagerAddress, address);
   if (response.error) {
     return createApiStandardResponse(response.error);
   }
@@ -68,34 +47,21 @@ export async function checkHasSetWhitelistedCreator(
   return createApiStandardResponse(null, isActivated);
 }
 
-export async function initializStoreAndSetCreator(
-  provider: ParticleNetwork
-): Promise<IApiStandardResponse> {
-  const address = provider.auth
-    .userInfo()
-    .wallets.filter((w) => w.chain_name === 'solana')[0].public_address;
+export async function initializStoreAndSetCreator(provider: ParticleNetwork): Promise<IApiStandardResponse> {
+  const address = getProviderSolanaAddress(provider);
 
   const balance = await connectionService.getConnection().getBalance(new PublicKey(address));
   if (balance < SOLANA_FEE_LAMPORTS_COST_PER_TRANSACTION) {
-    return createApiStandardResponse(
-      `Insufficient balance, please make sure your balance greater or equal to ${
-        SOLANA_FEE_LAMPORTS_COST_PER_TRANSACTION / LAMPORTS_PER_SOL
-      } SOL`
-    );
+    return createApiStandardResponse(`Insufficient balance, please make sure your balance greater or equal to ${SOLANA_FEE_LAMPORTS_COST_PER_TRANSACTION / LAMPORTS_PER_SOL} SOL`);
   }
 
-  const hasInitializedStore =
-    localStorage.getItem(createKeyHasInitializedStore(address)) === '1000';
-  const hasSetWhitelistedCreator =
-    localStorage.getItem(createKeyHasSetWhitelistedCreator(address)) === '1000';
+  const hasInitializedStore = localStorage.getItem(createKeyHasInitializedStore(address)) === '1000';
+  const hasSetWhitelistedCreator = localStorage.getItem(createKeyHasSetWhitelistedCreator(address)) === '1000';
 
   const unsignedTransactions = [];
 
   if (!hasInitializedStore) {
-    const responseInitStore = await connectionService.rpcRequest(
-      RPC_METHOD.NFT_INITIALIZE_STORE,
-      address
-    );
+    const responseInitStore = await connectionService.rpcRequest(RPC_METHOD.NFT_INITIALIZE_STORE, address);
     if (responseInitStore.error) {
       return createApiStandardResponse(responseInitStore.error);
     }
@@ -104,14 +70,10 @@ export async function initializStoreAndSetCreator(
   }
 
   if (!hasSetWhitelistedCreator) {
-    const responseSetWhitelistedCreator = await connectionService.rpcRequest(
-      RPC_METHOD.NFT_SET_WHITE_LISTED_CREATOR,
-      address,
-      {
-        creator: address,
-        activated: true,
-      }
-    );
+    const responseSetWhitelistedCreator = await connectionService.rpcRequest(RPC_METHOD.NFT_SET_WHITE_LISTED_CREATOR, address, {
+      creator: address,
+      activated: true,
+    });
 
     if (responseSetWhitelistedCreator.error) {
       return createApiStandardResponse(responseSetWhitelistedCreator.error);
@@ -131,13 +93,9 @@ export async function initializStoreAndSetCreator(
 
   const signedTransactions = responseSigned.result;
   for (const signedTransaction of signedTransactions) {
-    const responseConfirm = await connectionService.rpcRequest(
-      RPC_METHOD.SEND_AND_CONFIRM_RAW_TRANSACTION,
-      bs58.encode(Buffer.from(signedTransaction, 'base64')),
-      {
-        commitment: 'recent',
-      }
-    );
+    const responseConfirm = await connectionService.rpcRequest(RPC_METHOD.SEND_AND_CONFIRM_RAW_TRANSACTION, bs58.encode(Buffer.from(signedTransaction, 'base64')), {
+      commitment: 'recent',
+    });
 
     if (responseConfirm.error) {
       return createApiStandardResponse(responseConfirm.error);

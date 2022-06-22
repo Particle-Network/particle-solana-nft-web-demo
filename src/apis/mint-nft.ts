@@ -1,6 +1,6 @@
 import { bs58 } from '@project-serum/anchor/dist/cjs/utils/bytes';
 import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
-import { createApiStandardResponse, signTransaction } from './utils';
+import { createApiStandardResponse, getProviderSolanaAddress, signTransaction } from './utils';
 import { Metadata } from '@metaplex-foundation/mpl-token-metadata';
 import { programs } from '@metaplex/js';
 import { IApiStandardResponse, NFT_MINT_FEE_LAMPORTS_COST, RPC_METHOD } from './common-types';
@@ -8,23 +8,13 @@ import connectionService from './connection-service';
 import marketDatabase from './market-database';
 import { ParticleNetwork } from '@particle-network/provider';
 
-export async function mintNFT(
-  provider: ParticleNetwork,
-  config: any,
-  fromData: FormData
-): Promise<IApiStandardResponse> {
-  const address = provider.auth
-    .userInfo()
-    .wallets.filter((w) => w.chain_name === 'solana')[0].public_address;
+export async function mintNFT(provider: ParticleNetwork, config: any, fromData: FormData): Promise<IApiStandardResponse> {
+  const address = getProviderSolanaAddress(provider);
   console.log(`mintNFT:${address}`, config, fromData);
 
   const balance = await connectionService.getConnection().getBalance(new PublicKey(address));
   if (balance < NFT_MINT_FEE_LAMPORTS_COST) {
-    return createApiStandardResponse(
-      `Insufficient balance, please make sure your balance greater or equal to ${
-        NFT_MINT_FEE_LAMPORTS_COST / LAMPORTS_PER_SOL
-      } SOL`
-    );
+    return createApiStandardResponse(`Insufficient balance, please make sure your balance greater or equal to ${NFT_MINT_FEE_LAMPORTS_COST / LAMPORTS_PER_SOL} SOL`);
   }
 
   const responseIpfs = await connectionService.uploadFile(fromData);
@@ -50,22 +40,15 @@ export async function mintNFT(
     return createApiStandardResponse(responseMintNFT.error);
   }
 
-  const responseSigned = await signTransaction(
-    provider,
-    responseMintNFT.result.transaction.serialized
-  );
+  const responseSigned = await signTransaction(provider, responseMintNFT.result.transaction.serialized);
 
   if (responseSigned.error) {
     return createApiStandardResponse(responseSigned.error);
   }
 
-  const responseConfirm = await connectionService.rpcRequest(
-    RPC_METHOD.SEND_AND_CONFIRM_RAW_TRANSACTION,
-    bs58.encode(Buffer.from(responseSigned.result, 'base64')),
-    {
-      commitment: 'recent',
-    }
-  );
+  const responseConfirm = await connectionService.rpcRequest(RPC_METHOD.SEND_AND_CONFIRM_RAW_TRANSACTION, bs58.encode(Buffer.from(responseSigned.result, 'base64')), {
+    commitment: 'recent',
+  });
 
   if (responseConfirm.error) {
     return createApiStandardResponse(responseConfirm.error);

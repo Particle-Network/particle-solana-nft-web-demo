@@ -2,15 +2,10 @@ import { IApiStandardResponse, RPC_METHOD } from './common-types';
 import marketDatabase from './market-database';
 import connectionService from './connection-service';
 import { ParticleNetwork } from '@particle-network/provider';
-import { createApiStandardResponse } from './utils';
+import { createApiStandardResponse, getProviderSolanaAddress } from './utils';
 
-export async function getNFTs(
-  provider: ParticleNetwork,
-  useCache: boolean = true
-): Promise<IApiStandardResponse> {
-  const address = provider.auth
-    .userInfo()
-    .wallets.filter((w) => w.chain_name === 'solana')[0].public_address;
+export async function getNFTs(provider: ParticleNetwork, useCache: boolean = true): Promise<IApiStandardResponse> {
+  const address = getProviderSolanaAddress(provider);
   console.log(`getNFTs:${address}`);
 
   if (!useCache) {
@@ -21,10 +16,7 @@ export async function getNFTs(
     return createApiStandardResponse(null, await marketDatabase.nfts.where({ address }).toArray());
   }
 
-  const responseGetTokenAndNFTs = await connectionService.rpcRequest(
-    RPC_METHOD.GET_TOKENS_AND_NFTS,
-    address
-  );
+  const responseGetTokenAndNFTs = await connectionService.rpcRequest(RPC_METHOD.GET_TOKENS_AND_NFTS, address);
 
   if (responseGetTokenAndNFTs.error) {
     return createApiStandardResponse(responseGetTokenAndNFTs.error);

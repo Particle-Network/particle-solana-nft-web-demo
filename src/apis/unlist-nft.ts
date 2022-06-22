@@ -1,43 +1,26 @@
 import { bs58 } from '@project-serum/anchor/dist/cjs/utils/bytes';
 import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
-import { createApiStandardResponse, signTransaction } from './utils';
-import {
-  IApiStandardResponse,
-  RPC_METHOD,
-  SOLANA_FEE_LAMPORTS_COST_PER_TRANSACTION,
-} from './common-types';
+import { createApiStandardResponse, getProviderSolanaAddress, signTransaction } from './utils';
+import { IApiStandardResponse, RPC_METHOD, SOLANA_FEE_LAMPORTS_COST_PER_TRANSACTION } from './common-types';
 import connectionService from './connection-service';
 import { ParticleNetwork } from '@particle-network/provider';
 import marketDatabase from './market-database';
 
-export async function unlistNFT(
-  provider: ParticleNetwork,
-  auctionManagerAddress: string
-): Promise<IApiStandardResponse> {
-  const address = provider.auth
-    .userInfo()
-    .wallets.filter((w) => w.chain_name === 'solana')[0].public_address;
+export async function unlistNFT(provider: ParticleNetwork, auctionManagerAddress: string): Promise<IApiStandardResponse> {
+  const address = getProviderSolanaAddress(provider);
   console.log(`unlistNFT:${address}`, auctionManagerAddress);
 
   const balance = await connectionService.getConnection().getBalance(new PublicKey(address));
   if (balance < SOLANA_FEE_LAMPORTS_COST_PER_TRANSACTION) {
-    return createApiStandardResponse(
-      `Insufficient balance, please make sure your balance greater or equal to ${
-        SOLANA_FEE_LAMPORTS_COST_PER_TRANSACTION / LAMPORTS_PER_SOL
-      } SOL`
-    );
+    return createApiStandardResponse(`Insufficient balance, please make sure your balance greater or equal to ${SOLANA_FEE_LAMPORTS_COST_PER_TRANSACTION / LAMPORTS_PER_SOL} SOL`);
   }
 
-  const auctionEntity = await marketDatabase.auctions
-    .where({ auctionManager: auctionManagerAddress })
-    .first();
+  const auctionEntity = await marketDatabase.auctions.where({ auctionManager: auctionManagerAddress }).first();
   if (!auctionEntity) {
     return createApiStandardResponse('Auction not found in local');
   }
 
-  const auctionManagerAI = await connectionService
-    .getConnection()
-    .getAccountInfo(new PublicKey(auctionManagerAddress));
+  const auctionManagerAI = await connectionService.getConnection().getAccountInfo(new PublicKey(auctionManagerAddress));
   if (!auctionManagerAI) {
     await marketDatabase.auctions.where({ auctionManager: auctionManagerAddress }).delete();
 
@@ -55,22 +38,15 @@ export async function unlistNFT(
     return createApiStandardResponse(responseNFTUnlist.error);
   }
 
-  const responseSigned = await signTransaction(
-    provider,
-    responseNFTUnlist.result.transaction.serialized
-  );
+  const responseSigned = await signTransaction(provider, responseNFTUnlist.result.transaction.serialized);
 
   if (responseSigned.error) {
     return createApiStandardResponse(responseSigned.error);
   }
 
-  const responseConfirm = await connectionService.rpcRequest(
-    RPC_METHOD.SEND_AND_CONFIRM_RAW_TRANSACTION,
-    bs58.encode(Buffer.from(responseSigned.result, 'base64')),
-    {
-      commitment: 'recent',
-    }
-  );
+  const responseConfirm = await connectionService.rpcRequest(RPC_METHOD.SEND_AND_CONFIRM_RAW_TRANSACTION, bs58.encode(Buffer.from(responseSigned.result, 'base64')), {
+    commitment: 'recent',
+  });
 
   if (responseConfirm.error) {
     return createApiStandardResponse(responseConfirm.error);

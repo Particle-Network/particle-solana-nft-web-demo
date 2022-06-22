@@ -55,7 +55,7 @@ const Header = (props: any) => {
                     (userInfo.address || '').substring((userInfo.address || '').length - 6)}
                 </span>
                 <CopyToClipboard
-                  text={userInfo.address}
+                  text={userInfo.address || ''}
                   onCopy={() => {
                     message.success('Copy Successfully！');
                   }}

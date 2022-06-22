@@ -1,6 +1,5 @@
 import { isServer } from './env-util';
 import { ParticleNetwork } from '@particle-network/provider';
-import * as solanaWeb3 from '@solana/web3.js';
 import Web3 from 'web3';
 import { CHAIN_ID } from '../apis/common-types';
 import connectionService from '../apis/connection-service';
@@ -23,8 +22,8 @@ if (!isServer()) {
     // chainId: 42,
     chainName: 'solana',
     chainId,
-    rpcUrl: (process.env.NEXT_PUBLIC_BASE_URL || 'https://api.app-link.network') as string,
-    authUrl: (process.env.NEXT_PUBLIC_AUTH_URL || 'https://auth.app-link.network') as string,
+    rpcUrl: (process.env.NEXT_PUBLIC_BASE_URL || 'https://api.particle.network') as string,
+    authUrl: (process.env.NEXT_PUBLIC_AUTH_URL || 'https://auth.particle.network') as string,
   });
 
   // examples https://github.com/solana-labs/solana/blob/master/web3.js/examples/get_account_info.js
