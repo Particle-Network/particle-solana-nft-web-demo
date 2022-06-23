@@ -1,4 +1,14 @@
-# Solana NFT Market Demo
+<div align="center">
+  <a href="https://particle.network/">
+    <img src="./media/logo.png?raw=true" />
+  </a>
+  <br>
+  <br>
+  <h3>
+    Solana NFT Market Demo <br /><a href="https://docs.particle.network/nft-service/introduction">View documentation</a>
+  </h3>
+</div>
+
 ![](https://img.shields.io/badge/Typescript-💪-blue?style=round)
 ![GitHub](https://img.shields.io/github/license/silviopaganini/nft-market?style=round)
 
@@ -8,7 +18,7 @@ Demo of a Solana NFT Marketplace based on [Metaplex protocol](https://docs.metap
 See it live on [https://web-nft-demo.particle.network](https://web-nft-demo.particle.network)
 
 ## 🔬 Functionalities
-<img align="right" width="400" src="./image.png"></img>
+<img align="right" width="400" src="./media/image.png"></img>
 
 - Initialize Market
 - Query blockchain for NFT owner and metadata.
