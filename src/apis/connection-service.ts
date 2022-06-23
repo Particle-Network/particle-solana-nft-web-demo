@@ -4,9 +4,9 @@ import { createBasicAuthString } from './utils';
 import Axios from 'axios';
 
 export default new (class ConnectionService {
-  private chainId: CHAIN_ID = 103;
-  private projectId: string = '';
-  private projectClientKey: string = '';
+  public chainId: CHAIN_ID = 103;
+  public projectId: string = '';
+  public projectClientKey: string = '';
 
   public setChainId(chainId: number) {
     this.chainId = chainId;
@@ -24,7 +24,7 @@ export default new (class ConnectionService {
       const { data } = await Axios.post(
         SOLANA_RPC_URL,
         {
-          chainId: 103,
+          chainId: this.chainId,
           method: method,
           params,
         },

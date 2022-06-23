@@ -5,35 +5,17 @@ import NftList from './modules/nftList';
 import MintNFT from './modules/mintNFT';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import connectionService from '@/apis/connection-service';
-import {
-  getNFTs,
-  listNFT,
-  getAuctions,
-  getSettles,
-  getRetryTransactions,
-  getBalance,
-  getWSOLBalance,
-} from '@/apis/index';
+import { getNFTs, listNFT, getAuctions, getSettles, getRetryTransactions, getBalance, getWSOLBalance } from '@/apis/index';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { connectWallet, isLogin as isLoginHandle, getUserInfo } from '@/utils/index';
-import {
-  setUserInfo,
-  setSpinning,
-  selecteIsLogin,
-  setLogin,
-  selectSpinning,
-  selectNftImageData,
-  setNftList,
-  setNftImageData,
-  selecteChainId,
-} from '@/store/nftSlice';
+import { setUserInfo, setSpinning, selecteIsLogin, setLogin, selectSpinning, selectNftImageData, setNftList, setNftImageData, selecteChainId } from '@/store/nftSlice';
 import { NftListType, UserInfoProp, NftData } from '@/types/types.d';
 
 const Index = () => {
   const dispatch = useAppDispatch();
 
-  const [activeKey, setActiveKey] = useState<NftListType>(NftListType.MintNft);
+  const [activeKey, setActiveKey] = useState<NftListType>(NftListType.MyNft);
 
   const isLogin = useAppSelector(selecteIsLogin);
 
@@ -171,7 +153,8 @@ const Index = () => {
   };
 
   const settlesTab = (
-    <div className="seetles-tab-content">
+    <div className="tab-wrapper seetles-tab-content">
+      <i className="iconfont icon-mjiesuan"></i>
       <span>Settles</span>
       {settleCount ? (
         <div className="tab-badge-content">
@@ -225,60 +208,57 @@ const Index = () => {
           <div className="main">
             <div className="main-wrapper">
               {isLogin ? (
-                <Tabs
-                  size="large"
-                  activeKey={activeKey}
-                  centered={true}
-                  onChange={(activeKey: string) => setActiveKey(activeKey as NftListType)}
-                >
-                  <Tabs.TabPane tab="Market" key={NftListType.Market}>
-                    {activeKey == NftListType.Market ? (
-                      <NftList
-                        type={NftListType.Market}
-                        getNftListHandle={getNftListHandle}
-                        getSettleCountHandle={getSettleCountHandle}
-                      />
-                    ) : (
-                      ''
-                    )}
-                  </Tabs.TabPane>
-                  <Tabs.TabPane tab="Mint NFT" key={NftListType.MintNft}>
-                    {activeKey == NftListType.MintNft ? (
-                      <MintNFT type={NftListType.MintNft} setActiveKey={setActiveKey} />
-                    ) : (
-                      ''
-                    )}
-                  </Tabs.TabPane>
-                  <Tabs.TabPane tab="My NFTs" key={NftListType.MyNft}>
-                    {activeKey == NftListType.MyNft ? (
-                      <NftList type={NftListType.MyNft} getNftListHandle={getNftListHandle} />
-                    ) : (
-                      ''
-                    )}
-                  </Tabs.TabPane>
-                  <Tabs.TabPane tab={settlesTab} key={NftListType.SettleAccounts}>
-                    {activeKey == NftListType.SettleAccounts ? (
-                      <NftList
-                        type={NftListType.SettleAccounts}
-                        getNftListHandle={getNftListHandle}
-                        getSettleCountHandle={getSettleCountHandle}
-                      />
-                    ) : (
-                      ''
-                    )}
+                <Tabs size="large" activeKey={activeKey} centered={true} onChange={(activeKey: string) => setActiveKey(activeKey as NftListType)}>
+                  <Tabs.TabPane
+                    tab={
+                      <div className="tab-wrapper">
+                        {' '}
+                        <i className="iconfont icon-mcaidan"></i>
+                        <span>Market</span>
+                      </div>
+                    }
+                    key={NftListType.Market}
+                  >
+                    {activeKey == NftListType.Market ? <NftList type={NftListType.Market} getNftListHandle={getNftListHandle} getSettleCountHandle={getSettleCountHandle} /> : ''}
                   </Tabs.TabPane>
                   <Tabs.TabPane
-                    tab="Uncompleted Transactions"
+                    tab={
+                      <div className="tab-wrapper">
+                        {' '}
+                        <i className="iconfont icon-myewubiaodan"></i>
+                        <span>Mint NFT</span>
+                      </div>
+                    }
+                    key={NftListType.MintNft}
+                  >
+                    {activeKey == NftListType.MintNft ? <MintNFT type={NftListType.MintNft} setActiveKey={setActiveKey} /> : ''}
+                  </Tabs.TabPane>
+                  <Tabs.TabPane
+                    tab={
+                      <div className="tab-wrapper">
+                        {' '}
+                        <i className="iconfont icon-m31wode"></i>
+                        <span>My NFTs</span>
+                      </div>
+                    }
+                    key={NftListType.MyNft}
+                  >
+                    {activeKey == NftListType.MyNft ? <NftList type={NftListType.MyNft} getNftListHandle={getNftListHandle} /> : ''}
+                  </Tabs.TabPane>
+                  <Tabs.TabPane tab={settlesTab} key={NftListType.SettleAccounts}>
+                    {activeKey == NftListType.SettleAccounts ? <NftList type={NftListType.SettleAccounts} getNftListHandle={getNftListHandle} getSettleCountHandle={getSettleCountHandle} /> : ''}
+                  </Tabs.TabPane>
+                  <Tabs.TabPane
+                    tab={
+                      <div className="tab-wrapper">
+                        {' '}
+                        <i className="iconfont icon-morder-incomplete"></i>
+                        <span>Uncompleted Transactions</span>
+                      </div>
+                    }
                     key={NftListType.UncompletedTransaction}
                   >
-                    {activeKey == NftListType.UncompletedTransaction ? (
-                      <NftList
-                        type={NftListType.UncompletedTransaction}
-                        getNftListHandle={getNftListHandle}
-                      />
-                    ) : (
-                      ''
-                    )}
+                    {activeKey == NftListType.UncompletedTransaction ? <NftList type={NftListType.UncompletedTransaction} getNftListHandle={getNftListHandle} /> : ''}
                   </Tabs.TabPane>
                 </Tabs>
               ) : (

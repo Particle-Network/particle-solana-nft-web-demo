@@ -92,8 +92,7 @@ export const nftSlice = createSlice({
   },
 });
 
-export const { setNftList, setUserInfo, setSpinning, setNftImageData, setLogin, setChainId } =
-  nftSlice.actions;
+export const { setNftList, setUserInfo, setSpinning, setNftImageData, setLogin, setChainId } = nftSlice.actions;
 
 export const selectNftList = (state: AppState) => state.nft.nftList;
 

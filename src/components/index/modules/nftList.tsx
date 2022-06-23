@@ -24,14 +24,7 @@ interface Props {
 }
 
 const NftItem = (props: Props) => {
-  const {
-    tabType,
-    setAmountModelVisible,
-    setEditModelVisible,
-    setActivateMintId,
-    mint,
-    nft = {},
-  } = props;
+  const { tabType, setAmountModelVisible, setEditModelVisible, setActivateMintId, mint, nft = {} } = props;
 
   const [buyNowLoading, setBuyNowLoading] = useState(false);
   const [offShelvesLoading, setOffShelvesLoading] = useState(false);
@@ -45,9 +38,7 @@ const NftItem = (props: Props) => {
   return (
     <div className="nft-item" data-mint={mint}>
       <Spin spinning={!nftImageData[mint]} wrapperClassName="img-loading-content">
-        <div className="img">
-          {nftImageData[mint] ? <img src={nftImageData[mint]} alt={mint} /> : ''}
-        </div>
+        <div className="img">{nftImageData[mint] ? <img src={nftImageData[mint]} alt={mint} /> : ''}</div>
       </Spin>
       <div className="info">
         <div className="item-row1">{nft.name}</div>
@@ -57,13 +48,7 @@ const NftItem = (props: Props) => {
             {props.price ? (
               <>
                 {' '}
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M3.80286 13.8188C3.90696 13.7147 4.0501 13.6539 4.20191 13.6539H17.9689C18.2205 13.6539 18.3463 13.9576 18.1685 14.1354L15.4489 16.855C15.3448 16.9591 15.2017 17.0198 15.0498 17.0198H1.28281C1.03124 17.0198 0.905451 16.7162 1.08329 16.5383L3.80286 13.8188Z"
                     fill="url(#paint0_linear_354_8099)"
@@ -77,36 +62,15 @@ const NftItem = (props: Props) => {
                     fill="url(#paint2_linear_354_8099)"
                   ></path>
                   <defs>
-                    <linearGradient
-                      id="paint0_linear_354_8099"
-                      x1="16.6538"
-                      y1="1.87538"
-                      x2="7.1259"
-                      y2="20.1251"
-                      gradientUnits="userSpaceOnUse"
-                    >
+                    <linearGradient id="paint0_linear_354_8099" x1="16.6538" y1="1.87538" x2="7.1259" y2="20.1251" gradientUnits="userSpaceOnUse">
                       <stop stopColor="#00FFA3"></stop>
                       <stop offset="1" stopColor="#DC1FFF"></stop>
                     </linearGradient>
-                    <linearGradient
-                      id="paint1_linear_354_8099"
-                      x1="12.4877"
-                      y1="-0.299659"
-                      x2="2.95979"
-                      y2="17.9501"
-                      gradientUnits="userSpaceOnUse"
-                    >
+                    <linearGradient id="paint1_linear_354_8099" x1="12.4877" y1="-0.299659" x2="2.95979" y2="17.9501" gradientUnits="userSpaceOnUse">
                       <stop stopColor="#00FFA3"></stop>
                       <stop offset="1" stopColor="#DC1FFF"></stop>
                     </linearGradient>
-                    <linearGradient
-                      id="paint2_linear_354_8099"
-                      x1="14.5575"
-                      y1="0.78106"
-                      x2="5.02959"
-                      y2="19.0308"
-                      gradientUnits="userSpaceOnUse"
-                    >
+                    <linearGradient id="paint2_linear_354_8099" x1="14.5575" y1="0.78106" x2="5.02959" y2="19.0308" gradientUnits="userSpaceOnUse">
                       <stop stopColor="#00FFA3"></stop>
                       <stop offset="1" stopColor="#DC1FFF"></stop>
                     </linearGradient>
@@ -331,17 +295,7 @@ const NftList = (props: any) => {
             });
         }}
       >
-        <div className="white-theme-form">
-          {
-            <MintNFT
-              ref={mintNFTRef}
-              formType="edit"
-              type={props.type}
-              activateMintId={activateMintId}
-              setActiveKey={() => {}}
-            />
-          }
-        </div>
+        <div className="white-theme-form">{<MintNFT ref={mintNFTRef} formType="edit" type={props.type} activateMintId={activateMintId} setActiveKey={() => {}} />}</div>
       </Modal>
 
       <Modal
@@ -353,12 +307,7 @@ const NftList = (props: any) => {
         onOk={() => {
           setOnShelvesLoading(true);
           const { price } = onShelvesForm.getFieldsValue();
-          listNFT(
-            window.particle,
-            getProviderSolanaAddress(window.particle),
-            activateMintId,
-            price
-          )
+          listNFT(window.particle, getProviderSolanaAddress(window.particle), activateMintId, price)
             .then((res) => {
               if (res.error) {
                 throw new Error(res.error);

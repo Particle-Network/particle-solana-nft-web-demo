@@ -35,6 +35,8 @@ export default class MyDocument extends Document {
           <meta name="referrer" content="no-referrer" />
           <link rel="icon" href="/favicon.ico" />
           <link rel="apple-touch-icon" href="/favicon.ico" />
+          {/* eslint-disable-next-line */}
+          <link rel="stylesheet" href="/fonts/iconfont/iconfont.css" />
         </Head>
         <body>
           <Main />
