@@ -2,8 +2,6 @@
   <a href="https://particle.network/">
     <img src="./media/logo.png?raw=true" />
   </a>
-  <br>
-  <br>
   <h3>
     Solana NFT Market Demo <br /><a href="https://docs.particle.network/nft-service/introduction">View documentation</a>
   </h3>
