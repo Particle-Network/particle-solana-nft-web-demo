@@ -2,7 +2,7 @@ import { Form, Input, Button, Modal, Empty, message } from 'antd';
 import { useEffect, useState, useRef } from 'react';
 import MintNFT from './mintNFT';
 import { NftListType } from '@/types/types.d';
-import { listNFT, unlistNFT, settleNFT, buyNFT } from '@/apis/index';
+import { listNFT, unlistNFT, settleNFT, buyNFT, retryTransaction } from '@/apis/index';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { selectNftImageData, selectNftList } from '@/store/nftSlice';
 import { Spin } from 'antd';
@@ -21,6 +21,7 @@ interface Props {
   getSettleCountHandle: () => void;
   price?: string;
   uuid?: string;
+  updateAuthority?: string;
 }
 
 const NftItem = (props: Props) => {
@@ -29,6 +30,7 @@ const NftItem = (props: Props) => {
   const [buyNowLoading, setBuyNowLoading] = useState(false);
   const [offShelvesLoading, setOffShelvesLoading] = useState(false);
   const [settleAccountsLoading, setSettleAccountsLoading] = useState(false);
+  const [toFinishLoading, setToFinishLoading] = useState(false);
 
   const nftImageData = useAppSelector(selectNftImageData);
   console.log(nftImageData);
@@ -94,7 +96,7 @@ const NftItem = (props: Props) => {
                     unlistNFT(window.particle, props.auctionManager as string)
                       .then((res) => {
                         setOffShelvesLoading(false);
-                        message.success('success');
+                        message.success('Success');
                         // refresh data
                         if (props.getNftListHandle) {
                           props.getNftListHandle();
@@ -113,6 +115,7 @@ const NftItem = (props: Props) => {
                 <Button
                   className="btn"
                   loading={buyNowLoading}
+                  type="primary"
                   onClick={() => {
                     console.log(props);
                     setBuyNowLoading(true);
@@ -120,9 +123,13 @@ const NftItem = (props: Props) => {
                       .then((res) => {
                         setBuyNowLoading(false);
                         if (res.error) {
-                          throw new Error(res.error);
+                          if (typeof res.error == 'string') {
+                            throw new Error(res.error);
+                          } else {
+                            throw new Error(res.error?.message || res.error);
+                          }
                         } else {
-                          message.success('success');
+                          message.success('Success');
                           if (props.getSettleCountHandle) {
                             props.getSettleCountHandle();
                           }
@@ -149,6 +156,7 @@ const NftItem = (props: Props) => {
                 {/* Shelves */}
                 <Button
                   className="btn"
+                  type="primary"
                   onClick={() => {
                     setActivateMintId(mint);
                     setAmountModelVisible(true);
@@ -158,15 +166,18 @@ const NftItem = (props: Props) => {
                   List
                 </Button>
                 {/* Edit */}
-                <Button
-                  className="btn"
-                  onClick={() => {
-                    setActivateMintId(mint);
-                    setEditModelVisible(true);
-                  }}
-                >
-                  Edit
-                </Button>
+                {
+                  <Button
+                    className="btn"
+                    disabled={props.updateAuthority != props.address}
+                    onClick={() => {
+                      setActivateMintId(mint);
+                      setEditModelVisible(true);
+                    }}
+                  >
+                    Edit
+                  </Button>
+                }
               </>
             ) : (
               ''
@@ -210,7 +221,31 @@ const NftItem = (props: Props) => {
             {tabType == NftListType.UncompletedTransaction ? (
               <>
                 {/* To Finish */}
-                <Button className="btn">To Finish</Button>
+                <Button
+                  className="btn"
+                  loading={toFinishLoading}
+                  onClick={() => {
+                    setToFinishLoading(true);
+                    retryTransaction(window.particle, props.uuid as string)
+                      .then((res) => {
+                        setToFinishLoading(false);
+                        if (res.error) {
+                          throw new Error(res.error);
+                        } else {
+                          message.success('Finish');
+                          if (props.getNftListHandle) {
+                            props.getNftListHandle();
+                          }
+                        }
+                      })
+                      .catch((error: Error) => {
+                        setToFinishLoading(false);
+                        message.error(error.message);
+                      });
+                  }}
+                >
+                  To Finish
+                </Button>
               </>
             ) : (
               ''
@@ -236,6 +271,8 @@ const NftList = (props: any) => {
 
   const [onShelvesLoading, setOnShelvesLoading] = useState(false);
 
+  const address = useState<string>(getProviderSolanaAddress(window.particle));
+
   useEffect(() => {
     if (editModelVisible && mintNFTRef.current) {
       mintNFTRef.current.form.resetFields();
@@ -257,7 +294,9 @@ const NftList = (props: any) => {
             <NftItem
               {...props}
               {...item}
+              address={address[0]}
               mint={item.mint}
+              updateAuthority={item.nft.metadata.updateAuthority}
               tabType={props.type}
               setAmountModelVisible={setAmountModelVisible}
               setEditModelVisible={setEditModelVisible}
@@ -299,7 +338,7 @@ const NftList = (props: any) => {
       </Modal>
 
       <Modal
-        title="Set Amount"
+        title="Set Price"
         forceRender={true}
         visible={amountModelVisible}
         confirmLoading={onShelvesLoading}
@@ -326,7 +365,7 @@ const NftList = (props: any) => {
       >
         <div className="white-theme-form">
           <Form form={onShelvesForm}>
-            <Form.Item label="Price" name="price">
+            <Form.Item label="SOL" name="price">
               <Input placeholder="Please input price（sol）" />
             </Form.Item>
           </Form>

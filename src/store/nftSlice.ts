@@ -28,6 +28,7 @@ export interface NftState {
   nftList: Array<NftData>;
   isLogin: boolean;
   chainId: number;
+  hasInitializedStore: boolean;
 }
 
 const initialState: NftState = {
@@ -42,6 +43,7 @@ const initialState: NftState = {
   nftImageData: isServer() ? {} : JSON.parse(localStorage.getItem('nftImageData') || '{}'),
   isLogin: false,
   nftList: [],
+  hasInitializedStore: isServer() ? false : !!localStorage.getItem('hasInitializedStore'),
 };
 
 export const nftSlice = createSlice({
@@ -89,10 +91,14 @@ export const nftSlice = createSlice({
       localStorage.setItem('chainId', action.payload + '');
       state.chainId = action.payload;
     },
+    setHasInitializedStore(state, action: PayloadAction<boolean>) {
+      localStorage.setItem('hasInitializedStore', action.payload ? '1' : '');
+      state.hasInitializedStore = action.payload;
+    },
   },
 });
 
-export const { setNftList, setUserInfo, setSpinning, setNftImageData, setLogin, setChainId } = nftSlice.actions;
+export const { setNftList, setUserInfo, setSpinning, setNftImageData, setLogin, setChainId, setHasInitializedStore } = nftSlice.actions;
 
 export const selectNftList = (state: AppState) => state.nft.nftList;
 
@@ -105,5 +111,7 @@ export const selectNftImageData = (state: AppState) => state.nft.nftImageData;
 export const selecteIsLogin = (state: AppState) => state.nft.isLogin;
 
 export const selecteChainId = (state: AppState) => state.nft.chainId;
+
+export const selecteHasInitializedStore = (state: AppState) => state.nft.hasInitializedStore;
 
 export default nftSlice.reducer;

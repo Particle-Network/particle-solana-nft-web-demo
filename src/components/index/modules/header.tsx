@@ -5,15 +5,7 @@ import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { CopyOutlined } from '@ant-design/icons';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
-import {
-  setUserInfo,
-  setSpinning,
-  selecteIsLogin,
-  setLogin,
-  selectUserInfo,
-  selecteChainId,
-  setChainId,
-} from '@/store/nftSlice';
+import { setUserInfo, setSpinning, selecteIsLogin, setLogin, selectUserInfo, selecteChainId, setChainId, selecteHasInitializedStore, setHasInitializedStore } from '@/store/nftSlice';
 
 import { getBalance, withdrawWSOLAccount, CHAIN_ID } from '@/apis/index';
 
@@ -49,11 +41,7 @@ const Header = (props: any) => {
             <div className="right">
               <div className="userName">Normie</div>
               <div className="address">
-                <span>
-                  {(userInfo.address || '').substring(0, 6) +
-                    '...' +
-                    (userInfo.address || '').substring((userInfo.address || '').length - 6)}
-                </span>
+                <span>{(userInfo.address || '').substring(0, 5) + '...' + (userInfo.address || '').substring((userInfo.address || '').length - 5)}</span>
                 <CopyToClipboard
                   text={userInfo.address || ''}
                   onCopy={() => {
@@ -65,9 +53,7 @@ const Header = (props: any) => {
               </div>
             </div>
           </div>
-          <div className="network-name">
-            NetWork：{(chainList.find((item) => parseInt(item.value) == chainId) || {}).label}
-          </div>
+          <div className="network-name">NetWork：{(chainList.find((item) => parseInt(item.value) == chainId) || {}).label}</div>
         </div>
         <div className="balance-content">
           <div className="main-wallect">
@@ -111,7 +97,7 @@ const Header = (props: any) => {
                     if (res.error) {
                       throw new Error(res.error);
                     } else {
-                      message.success('success');
+                      message.success('Success');
                       setWithdrawShow(false);
                       if (props.getBalanceHandle) {
                         props.getBalanceHandle();
@@ -166,6 +152,7 @@ const Header = (props: any) => {
               dispatch(setLogin(isLoginHandle()));
               dispatch(setUserInfo(getUserInfo()));
               localStorage.removeItem('chainId');
+              localStorage.removeItem('hasInitializedStore');
             });
           }}
         >
@@ -208,28 +195,7 @@ const Header = (props: any) => {
             </Popover>
           </>
         ) : (
-          <Button
-            className="connect-wallet"
-            size="large"
-            onClick={() => {
-              dispatch(setSpinning(true));
-              connectWallet()
-                .then(() => {
-                  dispatch(setLogin(isLoginHandle()));
-                  dispatch(setUserInfo(getUserInfo()));
-                  dispatch(setSpinning(false));
-                })
-                .catch((error: Error) => {
-                  dispatch(setLogin(isLoginHandle()));
-                  dispatch(setSpinning(false));
-                  if (error.message) {
-                    message.error(error.message);
-                  }
-                });
-            }}
-          >
-            Connect Wallet
-          </Button>
+          <></>
         )}
       </div>
     </div>

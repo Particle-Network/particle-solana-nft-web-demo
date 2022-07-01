@@ -1,9 +1,4 @@
-import {
-  MinusCircleOutlined,
-  PlusOutlined,
-  UploadOutlined,
-  QuestionCircleOutlined,
-} from '@ant-design/icons';
+import { MinusCircleOutlined, PlusOutlined, UploadOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { Button, Form, Input, Slider, Row, Col, Space, message, Upload, Tooltip } from 'antd';
 import { useEffect, useImperativeHandle, useRef, useState, forwardRef } from 'react';
 import { mintNFT as addMintNFT, updateNFT } from '@/apis/index';
@@ -50,7 +45,7 @@ const MintNFT = forwardRef((props: Props, ref) => {
         if (res.error) {
           throw res.error.message;
         } else {
-          message.success('success');
+          message.success('Success');
           setLoading(false);
           if (setActiveKey) {
             setActiveKey(NftListType.MyNft);
@@ -82,9 +77,7 @@ const MintNFT = forwardRef((props: Props, ref) => {
       image: [image],
       attributes,
       description,
-      seller_fee_basis_points: seller_fee_basis_points
-        ? seller_fee_basis_points / 100
-        : seller_fee_basis_points,
+      seller_fee_basis_points: seller_fee_basis_points ? seller_fee_basis_points / 100 : seller_fee_basis_points,
       symbol,
     });
     setFileList([
@@ -190,6 +183,7 @@ const MintNFT = forwardRef((props: Props, ref) => {
           label="Image"
           name="image"
           valuePropName="image"
+          required={true}
           rules={[
             ({ getFieldValue }) => ({
               validator(_, value) {
@@ -223,12 +217,10 @@ const MintNFT = forwardRef((props: Props, ref) => {
               {fields.map((field, index) => (
                 <Form.Item
                   key={field.key}
-                  label="attributes"
+                  label="Attributes"
                   noStyle={!!index}
                   rules={[{ required: true }]}
-                  shouldUpdate={(prevValues, curValues) =>
-                    prevValues.area !== curValues.area || prevValues.sights !== curValues.sights
-                  }
+                  shouldUpdate={(prevValues, curValues) => prevValues.area !== curValues.area || prevValues.sights !== curValues.sights}
                 >
                   {() => (
                     <Row>
@@ -258,16 +250,7 @@ const MintNFT = forwardRef((props: Props, ref) => {
                               <Input placeholder="value" disabled={formType == 'edit'} />
                             </Form.Item>
                           </Col>
-                          <div className="delete-btn">
-                            {index == 0 || formType == 'edit' ? (
-                              ''
-                            ) : (
-                              <MinusCircleOutlined
-                                style={{ color: '#fff' }}
-                                onClick={() => remove(field.name)}
-                              />
-                            )}
-                          </div>
+                          <div className="delete-btn">{index == 0 || formType == 'edit' ? '' : <MinusCircleOutlined style={{ color: '#fff' }} onClick={() => remove(field.name)} />}</div>
                         </Row>
                       </Col>
                     </Row>

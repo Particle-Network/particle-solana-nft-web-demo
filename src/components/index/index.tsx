@@ -5,12 +5,35 @@ import NftList from './modules/nftList';
 import MintNFT from './modules/mintNFT';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import connectionService from '@/apis/connection-service';
-import { getNFTs, listNFT, getAuctions, getSettles, getRetryTransactions, getBalance, getWSOLBalance } from '@/apis/index';
-
+import {
+  getNFTs,
+  listNFT,
+  getAuctions,
+  getSettles,
+  getRetryTransactions,
+  getBalance,
+  getWSOLBalance,
+  checkHasSetWhitelistedCreator,
+  checkHasInitializedStore,
+  initializStoreAndSetCreator,
+} from '@/apis/index';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { connectWallet, isLogin as isLoginHandle, getUserInfo } from '@/utils/index';
-import { setUserInfo, setSpinning, selecteIsLogin, setLogin, selectSpinning, selectNftImageData, setNftList, setNftImageData, selecteChainId } from '@/store/nftSlice';
+import {
+  setUserInfo,
+  setSpinning,
+  selecteIsLogin,
+  setLogin,
+  selectSpinning,
+  selectNftImageData,
+  setNftList,
+  setNftImageData,
+  selecteChainId,
+  selecteHasInitializedStore,
+  setHasInitializedStore,
+} from '@/store/nftSlice';
 import { NftListType, UserInfoProp, NftData } from '@/types/types.d';
+import { getProviderSolanaAddress } from '@/apis/utils';
 
 const Index = () => {
   const dispatch = useAppDispatch();
@@ -24,6 +47,8 @@ const Index = () => {
   const nftImageData = useAppSelector(selectNftImageData);
 
   const chainId = useAppSelector(selecteChainId);
+
+  const hasInitializedStore = useAppSelector(selecteHasInitializedStore);
 
   /**
    * getNftImages
@@ -200,6 +225,18 @@ const Index = () => {
     connectionService.setChainId(chainId);
   }, [chainId]);
 
+  useEffect(() => {
+    if (isLogin) {
+      Promise.all([checkHasInitializedStore(window.particle), checkHasSetWhitelistedCreator(window.particle, getProviderSolanaAddress(window.particle))]).then((res: any) => {
+        if (typeof res.find((item: any) => !!item.error || item.result == false) != 'undefined') {
+          dispatch(setHasInitializedStore(false));
+        } else {
+          dispatch(setHasInitializedStore(true));
+        }
+      });
+    }
+  }, [isLogin]);
+
   return (
     <div className="index-container">
       <Spin spinning={spinning}>
@@ -207,7 +244,29 @@ const Index = () => {
           <Header getBalanceHandle={getBalanceHandle} />
           <div className="main">
             <div className="main-wrapper">
-              {isLogin ? (
+              {isLogin && !hasInitializedStore ? (
+                <div className="connect-walllet-content">
+                  {/* <h1>Connect your wallet to view your NFT</h1> */}
+                  <Button
+                    onClick={() => {
+                      dispatch(setSpinning(true));
+                      initializStoreAndSetCreator(window.particle).then((res) => {
+                        if (res.error) {
+                          message.error(res.error);
+                          dispatch(setSpinning(false));
+                        } else {
+                          dispatch(setLogin(isLoginHandle()));
+                          dispatch(setUserInfo(getUserInfo()));
+                          dispatch(setSpinning(false));
+                          dispatch(setHasInitializedStore(true));
+                        }
+                      });
+                    }}
+                  >
+                    Initialize Store
+                  </Button>
+                </div>
+              ) : isLogin ? (
                 <Tabs size="large" activeKey={activeKey} centered={true} onChange={(activeKey: string) => setActiveKey(activeKey as NftListType)}>
                   <Tabs.TabPane
                     tab={
@@ -268,10 +327,11 @@ const Index = () => {
                     onClick={() => {
                       dispatch(setSpinning(true));
                       connectWallet()
-                        .then(() => {
+                        .then((res: boolean) => {
                           dispatch(setLogin(isLoginHandle()));
                           dispatch(setUserInfo(getUserInfo()));
                           dispatch(setSpinning(false));
+                          dispatch(setHasInitializedStore(res));
                         })
                         .catch((error: Error) => {
                           dispatch(setLogin(isLoginHandle()));

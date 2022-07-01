@@ -40,13 +40,7 @@ export const connectWallet = () => {
     })
     .then((res: any) => {
       if (typeof res.find((item: any) => !!item.error || item.result == false) != 'undefined') {
-        return initializStoreAndSetCreator(window.particle).then((res) => {
-          if (res.error) {
-            throw new Error(res.error);
-          } else {
-            return true;
-          }
-        });
+        return false;
       } else {
         return true;
       }
