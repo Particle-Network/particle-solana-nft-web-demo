@@ -1,11 +1,10 @@
-import { ParticleNetwork } from '@particle-network/provider';
+import { SolanaWallet } from '@particle-network/solana-wallet';
 import marketDatabase, { RetryTransaction } from './market-database';
-import { getProviderSolanaAddress } from './utils';
 
-export async function getRetryTransactions(provider: ParticleNetwork): Promise<RetryTransaction[]> {
+export async function getRetryTransactions(wallet: SolanaWallet): Promise<RetryTransaction[]> {
   return await marketDatabase.retryTransactions
     .where({
-      address: getProviderSolanaAddress(provider),
+      address: wallet.publicKey()?.toBase58(),
     })
     .toArray();
 }

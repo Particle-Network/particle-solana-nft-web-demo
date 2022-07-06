@@ -33,7 +33,6 @@ import {
   setHasInitializedStore,
 } from '@/store/nftSlice';
 import { NftListType, UserInfoProp, NftData } from '@/types/types.d';
-import { getProviderSolanaAddress } from '@/apis/utils';
 
 const Index = () => {
   const dispatch = useAppDispatch();
@@ -92,7 +91,7 @@ const Index = () => {
     if (type === NftListType.Market) {
       // Market
       dispatch(setSpinning(true));
-      getAuctions(window.particle)
+      getAuctions(window.solanaWallet)
         .then((list: Array<any>) => {
           list = list.map((item) => {
             item.mint = item.nft.mint;
@@ -109,7 +108,7 @@ const Index = () => {
     } else if (type === NftListType.MyNft) {
       // My NFT
       dispatch(setSpinning(true));
-      getNFTs(window.particle, false)
+      getNFTs(window.solanaWallet, false)
         .then((res) => {
           if (res && !res.error) {
             dispatch(setNftList(res.result || []));
@@ -126,7 +125,7 @@ const Index = () => {
     } else if (type == NftListType.SettleAccounts) {
       // SettleAccounts
       dispatch(setSpinning(true));
-      getSettles(window.particle)
+      getSettles(window.solanaWallet)
         .then((list: any) => {
           list = list.map((item: any) => {
             item.mint = item.nft.mint;
@@ -142,7 +141,7 @@ const Index = () => {
         });
     } else if (type == NftListType.UncompletedTransaction) {
       // UncompletedTransaction
-      getRetryTransactions(window.particle)
+      getRetryTransactions(window.solanaWallet)
         .then((list: any) => {
           list = list.map((item: any) => {
             const { address, data, transactions, type, uuid } = item;
@@ -168,7 +167,7 @@ const Index = () => {
   const [settleCount, setSettleCount] = useState(0);
 
   const getSettleCountHandle = () => {
-    getSettles(window.particle)
+    getSettles(window.solanaWallet)
       .then((list: any) => {
         setSettleCount(list.length);
       })
@@ -192,7 +191,7 @@ const Index = () => {
   );
 
   const getBalanceHandle = () => {
-    getBalance(window.particle)
+    getBalance(window.solanaWallet)
       .then((balance: number) => {
         console.log(`balance`, balance);
         dispatch(setUserInfo({ balance: balance / LAMPORTS_PER_SOL } as UserInfoProp));
@@ -201,7 +200,7 @@ const Index = () => {
         console.log(error);
       });
 
-    getWSOLBalance(window.particle)
+    getWSOLBalance(window.solanaWallet)
       .then((balance: number) => {
         console.log(`wSOLBalance`, balance / LAMPORTS_PER_SOL);
         dispatch(
@@ -227,7 +226,7 @@ const Index = () => {
 
   useEffect(() => {
     if (isLogin) {
-      Promise.all([checkHasInitializedStore(window.particle), checkHasSetWhitelistedCreator(window.particle, getProviderSolanaAddress(window.particle))]).then((res: any) => {
+      Promise.all([checkHasInitializedStore(window.solanaWallet), checkHasSetWhitelistedCreator(window.solanaWallet, window.solanaWallet.publicKey()?.toBase58())]).then((res: any) => {
         if (typeof res.find((item: any) => !!item.error || item.result == false) != 'undefined') {
           dispatch(setHasInitializedStore(false));
         } else {
@@ -250,7 +249,7 @@ const Index = () => {
                   <Button
                     onClick={() => {
                       dispatch(setSpinning(true));
-                      initializStoreAndSetCreator(window.particle).then((res) => {
+                      initializStoreAndSetCreator(window.solanaWallet).then((res) => {
                         if (res.error) {
                           message.error(res.error);
                           dispatch(setSpinning(false));
@@ -302,7 +301,7 @@ const Index = () => {
                     }
                     key={NftListType.MyNft}
                   >
-                    {activeKey == NftListType.MyNft ? <NftList type={NftListType.MyNft} getNftListHandle={getNftListHandle} /> : ''}
+                    {activeKey == NftListType.MyNft ? <NftList type={NftListType.MyNft} setActiveKey={setActiveKey} getNftListHandle={getNftListHandle} /> : ''}
                   </Tabs.TabPane>
                   <Tabs.TabPane tab={settlesTab} key={NftListType.SettleAccounts}>
                     {activeKey == NftListType.SettleAccounts ? <NftList type={NftListType.SettleAccounts} getNftListHandle={getNftListHandle} getSettleCountHandle={getSettleCountHandle} /> : ''}

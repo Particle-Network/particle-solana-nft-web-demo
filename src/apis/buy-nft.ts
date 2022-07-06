@@ -1,17 +1,17 @@
-import { createApiStandardResponse, getProviderSolanaAddress } from './utils';
+import { createApiStandardResponse } from './utils';
 import connectionService from './connection-service';
 import { IApiStandardResponse, NFT_BUY_ESTIMATED_FEE_LAMPORTS_COST, RETRY_TRANSACTION_TYPE, RPC_METHOD } from './common-types';
 import { processTransactions } from './list-nft';
 import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import marketDatabase from './market-database';
 import { programs } from '@metaplex/js';
-import { ParticleNetwork } from '@particle-network/provider';
 import { v4 as uuid } from 'uuid';
 import { tryAddOrUpdateNFT } from './mint-nft';
 import { uniq } from 'lodash';
+import { SolanaWallet } from '@particle-network/solana-wallet';
 
-export async function buyNFT(provider: ParticleNetwork, auctionManagerAddress: string): Promise<IApiStandardResponse> {
-  const address = getProviderSolanaAddress(provider);
+export async function buyNFT(wallet: SolanaWallet, auctionManagerAddress: string): Promise<IApiStandardResponse> {
+  const address: any = wallet.publicKey()?.toBase58();
   console.log(`buyNFT:${address}`, auctionManagerAddress);
 
   const auctionEntity = await marketDatabase.auctions.where({ auctionManager: auctionManagerAddress }).first();
@@ -58,7 +58,7 @@ export async function buyNFT(provider: ParticleNetwork, auctionManagerAddress: s
     nft: auctionEntity.nft,
   };
 
-  const responseProcessTransactions = await processTransactions(provider, responseNFTBuy.result.transactions);
+  const responseProcessTransactions = await processTransactions(wallet, responseNFTBuy.result.transactions);
   if (responseProcessTransactions.error) {
     /**
      * Transactions failed, so we check if we need to retry
@@ -89,13 +89,13 @@ export async function buyNFT(provider: ParticleNetwork, auctionManagerAddress: s
     return responseProcessTransactions;
   }
 
-  await afterBuyNFT(provider, data);
+  await afterBuyNFT(wallet, data);
 
   return createApiStandardResponse();
 }
 
-export async function afterBuyNFT(provider: ParticleNetwork, args: any) {
-  const address = getProviderSolanaAddress(provider);
+export async function afterBuyNFT(wallet: SolanaWallet, args: any) {
+  const address: any = wallet.publicKey()?.toBase58();
 
   await marketDatabase.auctions.where({ auctionManager: args.auctionManager }).delete();
   await tryAddOrUpdateNFT(address, args.nft);

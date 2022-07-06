@@ -34,11 +34,11 @@ const MintNFT = forwardRef((props: Props, ref) => {
     delete config.image;
     let res = null;
     if (formType == 'edit') {
-      res = updateNFT(window.particle, activateMintId as string, config);
+      res = updateNFT(window.solanaWallet, activateMintId as string, config);
     } else {
       const formData = new FormData();
       formData.append('file', fileList[0].originFileObj as Blob);
-      res = addMintNFT(window.particle, config, formData);
+      res = addMintNFT(window.solanaWallet, config, formData);
     }
     return res
       .then((res) => {
@@ -54,14 +54,18 @@ const MintNFT = forwardRef((props: Props, ref) => {
         }
       })
       .catch((error) => {
-        message.error(typeof error == 'string' ? error : error.message);
+        const msg = typeof error == 'string' ? error : error.message;
+        if (!msg.includes('The user rejected the request')) {
+          message.error(msg);
+        }
         setLoading(false);
+        console.error(error);
         throw error;
       });
   };
 
   const initEditFormData = async () => {
-    const neftData = nftList.find((item: NftData) => item.mint == activateMintId) || {};
+    const neftData: any = nftList.find((item: NftData) => item.mint == activateMintId) || {};
     const uri = neftData.nft.metadata.data.uri;
     const { name, symbol, sellerFeeBasisPoints: seller_fee_basis_points } = neftData.nft;
     const { image, attributes, description } = await fetch(uri)

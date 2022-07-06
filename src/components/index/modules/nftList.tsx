@@ -4,9 +4,8 @@ import MintNFT from './mintNFT';
 import { NftListType } from '@/types/types.d';
 import { listNFT, unlistNFT, settleNFT, buyNFT, retryTransaction } from '@/apis/index';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { selectNftImageData, selectNftList } from '@/store/nftSlice';
+import { selectNftImageData, selectNftList, setSpinning } from '@/store/nftSlice';
 import { Spin } from 'antd';
-import { getProviderSolanaAddress } from '@/apis/utils';
 
 interface Props {
   tabType: string;
@@ -26,7 +25,7 @@ interface Props {
 
 const NftItem = (props: Props) => {
   const { tabType, setAmountModelVisible, setEditModelVisible, setActivateMintId, mint, nft = {} } = props;
-
+  const dispatch = useAppDispatch();
   const [buyNowLoading, setBuyNowLoading] = useState(false);
   const [offShelvesLoading, setOffShelvesLoading] = useState(false);
   const [settleAccountsLoading, setSettleAccountsLoading] = useState(false);
@@ -92,10 +91,15 @@ const NftItem = (props: Props) => {
                   className="btn"
                   loading={offShelvesLoading}
                   onClick={() => {
-                    setOffShelvesLoading(true);
-                    unlistNFT(window.particle, props.auctionManager as string)
+                    // setOffShelvesLoading(true);
+                    dispatch(setSpinning(true));
+                    unlistNFT(window.solanaWallet, props.auctionManager as string)
                       .then((res) => {
-                        setOffShelvesLoading(false);
+                        if (res.error) {
+                          throw new Error(res.error);
+                        }
+                        // setOffShelvesLoading(false);
+                        dispatch(setSpinning(false));
                         message.success('Success');
                         // refresh data
                         if (props.getNftListHandle) {
@@ -103,8 +107,11 @@ const NftItem = (props: Props) => {
                         }
                       })
                       .catch((error: Error) => {
-                        setOffShelvesLoading(false);
-                        message.error(error.message);
+                        // setOffShelvesLoading(false);
+                        dispatch(setSpinning(false));
+                        if (!error.message.includes('The user rejected the request')) {
+                          message.error(error.message);
+                        }
                       });
                   }}
                 >
@@ -118,10 +125,12 @@ const NftItem = (props: Props) => {
                   type="primary"
                   onClick={() => {
                     console.log(props);
-                    setBuyNowLoading(true);
-                    buyNFT(window.particle, props.auctionManager as string)
+                    // setBuyNowLoading(true);
+                    dispatch(setSpinning(true));
+                    buyNFT(window.solanaWallet, props.auctionManager as string)
                       .then((res) => {
-                        setBuyNowLoading(false);
+                        // setBuyNowLoading(false);
+                        dispatch(setSpinning(false));
                         if (res.error) {
                           if (typeof res.error == 'string') {
                             throw new Error(res.error);
@@ -139,8 +148,11 @@ const NftItem = (props: Props) => {
                         }
                       })
                       .catch((error: Error) => {
-                        setBuyNowLoading(false);
-                        message.error(error.message);
+                        // setBuyNowLoading(false);
+                        dispatch(setSpinning(false));
+                        if (!error.message.includes('The user rejected the request')) {
+                          message.error(error.message);
+                        }
                       });
                   }}
                 >
@@ -190,10 +202,12 @@ const NftItem = (props: Props) => {
                   className="btn"
                   loading={settleAccountsLoading}
                   onClick={() => {
-                    setSettleAccountsLoading(true);
-                    settleNFT(window.particle, props.uuid as string)
+                    // setSettleAccountsLoading(true);
+                    dispatch(setSpinning(true));
+                    settleNFT(window.solanaWallet, props.uuid as string)
                       .then((res) => {
-                        setSettleAccountsLoading(false);
+                        // setSettleAccountsLoading(false);
+                        dispatch(setSpinning(false));
                         if (res.error) {
                           throw new Error(res.error);
                         } else {
@@ -206,8 +220,11 @@ const NftItem = (props: Props) => {
                         }
                       })
                       .catch((error: Error) => {
-                        setSettleAccountsLoading(false);
-                        message.error(error.message);
+                        // setSettleAccountsLoading(false);
+                        dispatch(setSpinning(false));
+                        if (!error.message.includes('The user rejected the request')) {
+                          message.error(error.message);
+                        }
                       });
                   }}
                 >
@@ -226,7 +243,7 @@ const NftItem = (props: Props) => {
                   loading={toFinishLoading}
                   onClick={() => {
                     setToFinishLoading(true);
-                    retryTransaction(window.particle, props.uuid as string)
+                    retryTransaction(window.solanaWallet, props.uuid as string)
                       .then((res) => {
                         setToFinishLoading(false);
                         if (res.error) {
@@ -271,7 +288,7 @@ const NftList = (props: any) => {
 
   const [onShelvesLoading, setOnShelvesLoading] = useState(false);
 
-  const address = useState<string>(getProviderSolanaAddress(window.particle));
+  const address = useState<string>(window.solanaWallet.publicKey()?.toBase58());
 
   useEffect(() => {
     if (editModelVisible && mintNFTRef.current) {
@@ -344,29 +361,36 @@ const NftList = (props: any) => {
         confirmLoading={onShelvesLoading}
         onCancel={() => setAmountModelVisible(false)}
         onOk={() => {
-          setOnShelvesLoading(true);
           const { price } = onShelvesForm.getFieldsValue();
-          listNFT(window.particle, getProviderSolanaAddress(window.particle), activateMintId, price)
+          if (!price) {
+            message.error('Please input price（sol）');
+            return false;
+          }
+          setOnShelvesLoading(true);
+          listNFT(window.solanaWallet, window.solanaWallet.publicKey()?.toBase58(), activateMintId, price)
             .then((res) => {
               if (res.error) {
                 throw new Error(res.error);
               }
               setOnShelvesLoading(false);
               setAmountModelVisible(false);
-              if (props.getNftListHandle) {
-                props.getNftListHandle();
+              // to market list
+              if (props.setActiveKey) {
+                props.setActiveKey(NftListType.Market);
               }
             })
             .catch((error) => {
-              message.error(error.message);
               setOnShelvesLoading(false);
+              if (!error.message.includes('The user rejected the request')) {
+                message.error(error.message);
+              }
             });
         }}
       >
         <div className="white-theme-form">
           <Form form={onShelvesForm}>
             <Form.Item label="SOL" name="price">
-              <Input placeholder="Please input price（sol）" />
+              <Input placeholder="Please input price（sol）" type="number" />
             </Form.Item>
           </Form>
         </div>

@@ -22,9 +22,8 @@ export default new (class ConnectionService {
   public async rpcRequest(method: RPC_METHOD, ...params: any[]) {
     try {
       const { data } = await Axios.post(
-        SOLANA_RPC_URL,
+        `${SOLANA_RPC_URL}?chainId=${this.chainId}`,
         {
-          chainId: this.chainId,
           method: method,
           params,
         },

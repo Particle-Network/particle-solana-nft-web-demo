@@ -1,42 +1,51 @@
 import { isServer } from './env-util';
-import { ParticleNetwork } from '@particle-network/provider';
+import ParticleNetwork from '@particle-network/auth';
+import { ParticleProvider } from '@particle-network/provider';
+import { SolanaWallet } from '@particle-network/solana-wallet';
 import Web3 from 'web3';
 import { CHAIN_ID } from '../apis/common-types';
 import connectionService from '../apis/connection-service';
 import { checkHasInitializedStore, checkHasSetWhitelistedCreator, initializStoreAndSetCreator } from '@/apis/index';
-import { getProviderSolanaAddress } from '@/apis/utils';
 
-let pn: any = null;
+let pn: any = {};
 
 if (!isServer()) {
-  const chainId = CHAIN_ID.DEVNET;
+  try {
+    const chainId = CHAIN_ID.DEVNET;
 
-  pn = new ParticleNetwork({
-    projectId: process.env.NEXT_PUBLIC_PROJECT_ID as string,
-    clientKey: process.env.NEXT_PUBLIC_PROJECT_CLIENT_KEY as string,
-    appId: process.env.NEXT_PUBLIC_PROJECT_APP_ID as string,
-    // chainName: 'ethereum',
-    // chainId: 42,
-    chainName: 'solana',
-    chainId,
-    rpcUrl: (process.env.NEXT_PUBLIC_BASE_URL || 'https://api.particle.network') as string,
-    authUrl: (process.env.NEXT_PUBLIC_AUTH_URL || 'https://auth.particle.network') as string,
-  });
+    pn = new ParticleNetwork({
+      projectId: process.env.NEXT_PUBLIC_PROJECT_ID as string,
+      clientKey: process.env.NEXT_PUBLIC_PROJECT_CLIENT_KEY as string,
+      appId: process.env.NEXT_PUBLIC_PROJECT_APP_ID as string,
+      // chainName: 'ethereum',
+      // chainId: 42,
+      chainName: 'solana',
+      chainId,
+      // rpcUrl: (process.env.NEXT_PUBLIC_BASE_URL || 'https://api.particle.network') as string,
+      authUrl: (process.env.NEXT_PUBLIC_AUTH_URL || 'https://auth.particle.network') as string,
+    });
 
-  // examples https://github.com/solana-labs/solana/blob/master/web3.js/examples/get_account_info.js
-  // window.web3 = new solanaWeb3.Connection(process.env.NEXT_PUBLIC_AUTH_URL, pn.getSolanaProvider);
+    // examples https://github.com/solana-labs/solana/blob/master/web3.js/examples/get_account_info.js
+    // window.web3 = new solanaWeb3.Connection(process.env.NEXT_PUBLIC_AUTH_URL, pn.getSolanaProvider);
 
-  connectionService.setChainId(chainId);
-  connectionService.setProject(process.env.NEXT_PUBLIC_PROJECT_ID as string, process.env.NEXT_PUBLIC_PROJECT_CLIENT_KEY as string);
+    connectionService.setChainId(chainId);
+    connectionService.setProject(process.env.NEXT_PUBLIC_PROJECT_ID as string, process.env.NEXT_PUBLIC_PROJECT_CLIENT_KEY as string);
 
-  window.web3 = new Web3(pn.getSolanaProvider);
+    const evmProvider: any = new ParticleProvider(pn.auth);
+
+    window.web3 = new Web3(evmProvider);
+    window.web3.currentProvider.isParticleNetwork; // => true
+    window.solanaWallet = new SolanaWallet(pn?.auth);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 export const connectWallet = () => {
   return pn.auth
     .login()
     .then(() => {
-      return Promise.all([checkHasInitializedStore(window.particle), checkHasSetWhitelistedCreator(window.particle, getProviderSolanaAddress(window.particle))]);
+      return Promise.all([checkHasInitializedStore(window.solanaWallet), checkHasSetWhitelistedCreator(window.solanaWallet, window.solanaWallet.publicKey()?.toBase58())]);
     })
     .then((res: any) => {
       if (typeof res.find((item: any) => !!item.error || item.result == false) != 'undefined') {

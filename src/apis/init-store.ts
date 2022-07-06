@@ -1,12 +1,12 @@
 import { bs58 } from '@project-serum/anchor/dist/cjs/utils/bytes';
-import { createApiStandardResponse, getProviderSolanaAddress, signAllTransactions } from './utils';
+import { createApiStandardResponse, signAllTransactions } from './utils';
 import { IApiStandardResponse, RPC_METHOD, SOLANA_FEE_LAMPORTS_COST_PER_TRANSACTION } from './common-types';
 import connectionService from './connection-service';
-import { ParticleNetwork } from '@particle-network/provider';
 import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
+import { SolanaWallet } from '@particle-network/solana-wallet';
 
-export async function checkHasInitializedStore(provider: ParticleNetwork): Promise<IApiStandardResponse> {
-  const address = getProviderSolanaAddress(provider);
+export async function checkHasInitializedStore(wallet: SolanaWallet): Promise<IApiStandardResponse> {
+  const address: any = wallet.publicKey()?.toBase58();
 
   const hasInitializedStore = localStorage.getItem(createKeyHasInitializedStore(address)) === '1';
   if (hasInitializedStore) {
@@ -26,8 +26,8 @@ export async function checkHasInitializedStore(provider: ParticleNetwork): Promi
   return createApiStandardResponse(null, hasInitialized);
 }
 
-export async function checkHasSetWhitelistedCreator(provider: ParticleNetwork, marketManagerAddress: string): Promise<IApiStandardResponse> {
-  const address = getProviderSolanaAddress(provider);
+export async function checkHasSetWhitelistedCreator(wallet: SolanaWallet, marketManagerAddress: string): Promise<IApiStandardResponse> {
+  const address: any = wallet.publicKey()?.toBase58();
 
   const hasSetWhitelistedCreator = localStorage.getItem(createKeyHasSetWhitelistedCreator(address)) === '1';
   if (hasSetWhitelistedCreator) {
@@ -47,8 +47,8 @@ export async function checkHasSetWhitelistedCreator(provider: ParticleNetwork, m
   return createApiStandardResponse(null, isActivated);
 }
 
-export async function initializStoreAndSetCreator(provider: ParticleNetwork): Promise<IApiStandardResponse> {
-  const address = getProviderSolanaAddress(provider);
+export async function initializStoreAndSetCreator(wallet: SolanaWallet): Promise<IApiStandardResponse> {
+  const address: any = wallet.publicKey()?.toBase58();
 
   const balance = await connectionService.getConnection().getBalance(new PublicKey(address));
   if (balance < SOLANA_FEE_LAMPORTS_COST_PER_TRANSACTION) {
@@ -86,14 +86,14 @@ export async function initializStoreAndSetCreator(provider: ParticleNetwork): Pr
     return createApiStandardResponse();
   }
 
-  const responseSigned = await signAllTransactions(provider, unsignedTransactions);
+  const responseSigned = await signAllTransactions(wallet, unsignedTransactions);
   if (responseSigned.error) {
     return createApiStandardResponse(responseSigned.error);
   }
 
   const signedTransactions = responseSigned.result;
   for (const signedTransaction of signedTransactions) {
-    const responseConfirm = await connectionService.rpcRequest(RPC_METHOD.SEND_AND_CONFIRM_RAW_TRANSACTION, bs58.encode(Buffer.from(signedTransaction, 'base64')), {
+    const responseConfirm = await connectionService.rpcRequest(RPC_METHOD.SEND_AND_CONFIRM_RAW_TRANSACTION, bs58.encode(Buffer.from(signedTransaction?.serialize(), 'base64')), {
       commitment: 'recent',
     });
 

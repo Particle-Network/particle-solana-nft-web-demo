@@ -1,11 +1,10 @@
 import marketDatabase, { Settle } from './market-database';
-import { ParticleNetwork } from '@particle-network/provider';
-import { getProviderSolanaAddress } from './utils';
+import { SolanaWallet } from '@particle-network/solana-wallet';
 
-export async function getSettles(provider: ParticleNetwork): Promise<Settle[]> {
+export async function getSettles(wallet: SolanaWallet): Promise<Settle[]> {
   return await marketDatabase.settles
     .where({
-      address: getProviderSolanaAddress(provider),
+      address: wallet.publicKey()?.toBase58(),
     })
     .toArray();
 }

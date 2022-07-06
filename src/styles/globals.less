@@ -136,8 +136,7 @@ input[type='checkbox'] {
   outline: none;
 }
 
-.ant-select-focused:not(.ant-select-disabled).ant-select:not(.ant-select-customize-input)
-  .ant-select-selector {
+.ant-select-focused:not(.ant-select-disabled).ant-select:not(.ant-select-customize-input) .ant-select-selector {
   border-color: transparent;
 }
 
@@ -166,12 +165,7 @@ input[type='checkbox'] {
 }
 
 .skeleton-animation {
-  background: linear-gradient(
-    90deg,
-    rgba(34, 34, 34, 0.2) 25%,
-    rgba(255, 255, 255, 0.16) 37%,
-    rgba(34, 34, 34, 0.2) 63%
-  );
+  background: linear-gradient(90deg, rgba(34, 34, 34, 0.2) 25%, rgba(255, 255, 255, 0.16) 37%, rgba(34, 34, 34, 0.2) 63%);
 
   animation: ant-skeleton-loading 1.4s ease infinite;
 }
@@ -202,4 +196,8 @@ input[type='checkbox'] {
 
 .dt-relative.dt-flex.dt-items-center.dt-justify-center.dt-rounded-full:hover {
   @apply !scale-125 !bg-gray-800;
+}
+
+.ant-spin-nested-loading > div > .ant-spin {
+  z-index: 999;
 }

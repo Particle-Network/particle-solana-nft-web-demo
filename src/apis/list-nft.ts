@@ -1,21 +1,21 @@
-import { createApiStandardResponse, getProviderSolanaAddress, signAllTransactions } from './utils';
+import { createApiStandardResponse, signAllTransactions } from './utils';
 import { Store } from '@metaplex-foundation/mpl-metaplex';
 import { Keypair, LAMPORTS_PER_SOL, PublicKey, Transaction } from '@solana/web3.js';
 import connectionService from './connection-service';
 import { ERROR_MESSAGE_BLOCK_HASH_NOT_FOUND, IApiStandardResponse, IApiStandardTransaction, NFT_LIST_ESTIMATED_FEE_LAMPORTS_COST, RETRY_TRANSACTION_TYPE, RPC_METHOD } from './common-types';
 import bs58 from 'bs58';
 import marketDatabase from './market-database';
-import { ParticleNetwork } from '@particle-network/provider';
 import { v4 as uuid } from 'uuid';
+import { SolanaWallet } from '@particle-network/solana-wallet';
 
 /**
- * @param provider Seller
+ * @param wallet Seller
  * @param marketManagerAddress The address of market administrator
  * @param mintAddress The mint address of the NFT to sell
  * @param price Seller's price (sol), such as 0.1 sol
  */
-export async function listNFT(provider: ParticleNetwork, marketManagerAddress: string, mintAddress: string, price: number) {
-  const address = getProviderSolanaAddress(provider);
+export async function listNFT(wallet: SolanaWallet, marketManagerAddress: string, mintAddress: string, price: number) {
+  const address: any = wallet.publicKey()?.toBase58();
   console.log(`listNFT:${address}`, mintAddress, price);
 
   const balance = await connectionService.getConnection().getBalance(new PublicKey(address));
@@ -45,7 +45,7 @@ export async function listNFT(provider: ParticleNetwork, marketManagerAddress: s
 
   const auctionManagerAddress = responseNFTList.result.auctionManager;
 
-  const responseProcessTransactions = await processTransactions(provider, responseNFTList.result.transactions);
+  const responseProcessTransactions = await processTransactions(wallet, responseNFTList.result.transactions);
 
   const data = {
     mint: mintAddress,
@@ -88,13 +88,13 @@ export async function listNFT(provider: ParticleNetwork, marketManagerAddress: s
     return responseProcessTransactions;
   }
 
-  await afterListNFT(provider, data);
+  await afterListNFT(wallet, data);
 
   return createApiStandardResponse();
 }
 
-export async function afterListNFT(provider: ParticleNetwork, args: any) {
-  const address = getProviderSolanaAddress(provider);
+export async function afterListNFT(wallet: SolanaWallet, args: any) {
+  const address: any = wallet.publicKey()?.toBase58();
 
   await marketDatabase.nfts.where({ address, mint: args.mint }).delete();
 
@@ -107,13 +107,13 @@ export async function afterListNFT(provider: ParticleNetwork, args: any) {
 }
 
 /**
- * @param provider which one to sign all of transactions
+ * @param wallet which one to sign all of transactions
  * @param transactions transactions which has been partial signed except the provider
  * @param currentProcessTransactionIndex which transaction to process, start from 0
  * @param blockhash if assigned, the transaction will be replaced with this blockhash
  */
 export async function processTransactions(
-  provider: ParticleNetwork,
+  wallet: SolanaWallet,
   transactions: IApiStandardTransaction[],
   currentProcessTransactionIndex: number = 0,
   blockhash?: string
@@ -129,7 +129,7 @@ export async function processTransactions(
         const transaction = Transaction.from(bs58.decode(transactions[index].serialized));
 
         const newTransaction = new Transaction().add(...transaction.instructions);
-        newTransaction.feePayer = new PublicKey(getProviderSolanaAddress(provider));
+        newTransaction.feePayer = wallet.publicKey()!;
         newTransaction.recentBlockhash = blockhash;
 
         const signers = transactions[index].signers.map((s: string) => Keypair.fromSecretKey(bs58.decode(s)));
@@ -144,7 +144,7 @@ export async function processTransactions(
       }
     }
 
-    const responseSigned = await signAllTransactions(provider, unsignedTransactions);
+    const responseSigned = await signAllTransactions(wallet, unsignedTransactions);
     if (responseSigned.error) {
       console.error(responseSigned.error);
 
@@ -163,7 +163,7 @@ export async function processTransactions(
 
       currentProcessTransactionIndex = index;
 
-      const responseConfirm = await connectionService.rpcRequest(RPC_METHOD.SEND_AND_CONFIRM_RAW_TRANSACTION, bs58.encode(Buffer.from(signedTransaction, 'base64')), {
+      const responseConfirm = await connectionService.rpcRequest(RPC_METHOD.SEND_AND_CONFIRM_RAW_TRANSACTION, bs58.encode(Buffer.from(signedTransaction?.serialize(), 'base64')), {
         commitment: 'recent',
       });
 
@@ -184,7 +184,7 @@ export async function processTransactions(
     if (error.message === ERROR_MESSAGE_BLOCK_HASH_NOT_FOUND) {
       const recentBlockhash = await connectionService.getConnection().getLatestBlockhash();
 
-      return await processTransactions(provider, transactions, currentProcessTransactionIndex, recentBlockhash.blockhash);
+      return await processTransactions(wallet, transactions, currentProcessTransactionIndex, recentBlockhash.blockhash);
     }
 
     return createApiStandardResponse(error, currentProcessTransactionIndex);

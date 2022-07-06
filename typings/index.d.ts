@@ -9,6 +9,7 @@ interface Window {
   fbq: (...args: any[]) => void;
   particle: any;
   web3: any;
+  solanaWallet: any;
 }
 
 declare module 'react-grid-carousel';

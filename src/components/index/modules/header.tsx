@@ -91,7 +91,7 @@ const Header = (props: any) => {
             onClick={() => {
               if (!withdrawLoading) {
                 setWithdrawLoading(true);
-                withdrawWSOLAccount(window.particle)
+                withdrawWSOLAccount(window.solanaWallet)
                   .then((res) => {
                     setWithdrawLoading(false);
                     if (res.error) {

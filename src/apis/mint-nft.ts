@@ -1,15 +1,15 @@
 import { bs58 } from '@project-serum/anchor/dist/cjs/utils/bytes';
 import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
-import { createApiStandardResponse, getProviderSolanaAddress, signTransaction } from './utils';
+import { createApiStandardResponse, signTransaction } from './utils';
 import { Metadata } from '@metaplex-foundation/mpl-token-metadata';
 import { programs } from '@metaplex/js';
 import { IApiStandardResponse, NFT_MINT_FEE_LAMPORTS_COST, RPC_METHOD } from './common-types';
 import connectionService from './connection-service';
 import marketDatabase from './market-database';
-import { ParticleNetwork } from '@particle-network/provider';
+import { SolanaWallet } from '@particle-network/solana-wallet';
 
-export async function mintNFT(provider: ParticleNetwork, config: any, fromData: FormData): Promise<IApiStandardResponse> {
-  const address = getProviderSolanaAddress(provider);
+export async function mintNFT(wallet: SolanaWallet, config: any, fromData: FormData): Promise<IApiStandardResponse> {
+  const address: any = wallet.publicKey()?.toBase58();
   console.log(`mintNFT:${address}`, config, fromData);
 
   const balance = await connectionService.getConnection().getBalance(new PublicKey(address));
@@ -35,18 +35,24 @@ export async function mintNFT(provider: ParticleNetwork, config: any, fromData: 
     ],
   };
 
-  const responseMintNFT = await connectionService.rpcRequest(RPC_METHOD.NFT_MINT, address, config);
+  const responseMintNFT = await connectionService.rpcRequest(
+    RPC_METHOD.NFT_MINT,
+    {
+      owner: address,
+    },
+    config
+  );
   if (responseMintNFT.error) {
     return createApiStandardResponse(responseMintNFT.error);
   }
 
-  const responseSigned = await signTransaction(provider, responseMintNFT.result.transaction.serialized);
+  const responseSigned = await signTransaction(wallet, responseMintNFT.result.transaction.serialized);
 
   if (responseSigned.error) {
     return createApiStandardResponse(responseSigned.error);
   }
 
-  const responseConfirm = await connectionService.rpcRequest(RPC_METHOD.SEND_AND_CONFIRM_RAW_TRANSACTION, bs58.encode(Buffer.from(responseSigned.result, 'base64')), {
+  const responseConfirm = await connectionService.rpcRequest(RPC_METHOD.SEND_AND_CONFIRM_RAW_TRANSACTION, bs58.encode(Buffer.from(responseSigned.result?.serialize(), 'base64')), {
     commitment: 'recent',
   });
 

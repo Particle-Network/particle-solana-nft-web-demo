@@ -1,11 +1,10 @@
-import { ParticleNetwork } from '@particle-network/provider';
+import { SolanaWallet } from '@particle-network/solana-wallet';
 import marketDatabase, { Auction } from './market-database';
-import { getProviderSolanaAddress } from './utils';
 
-export async function getAuctions(provider: ParticleNetwork): Promise<Auction[]> {
+export async function getAuctions(wallet: SolanaWallet): Promise<Auction[]> {
   return await marketDatabase.auctions
     .where({
-      address: getProviderSolanaAddress(provider),
+      address: wallet.publicKey()?.toBase58(),
     })
     .toArray();
 }

@@ -5,7 +5,6 @@ import { NftListType, UserInfoProp, NftData } from '@/types/types.d';
 // @ts-ignore
 import { createIcon } from '@download/blockies';
 import { isLogin as isLoginHandle } from '@/utils/index';
-import { getProviderSolanaAddress } from '@/apis/utils';
 
 const createUserImg = (address: string) => {
   return createIcon({
@@ -66,7 +65,7 @@ export const nftSlice = createSlice({
 
       if (!userInfo.address && isLoginHandle()) {
         try {
-          userInfo.address = getProviderSolanaAddress(window.particle);
+          userInfo.address = window.solanaWallet.publicKey()?.toBase58();
         } catch (error) {
           console.log(error);
         }

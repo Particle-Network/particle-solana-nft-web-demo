@@ -1,11 +1,11 @@
 import { IApiStandardResponse, RPC_METHOD } from './common-types';
 import marketDatabase from './market-database';
 import connectionService from './connection-service';
-import { ParticleNetwork } from '@particle-network/provider';
-import { createApiStandardResponse, getProviderSolanaAddress } from './utils';
+import { createApiStandardResponse } from './utils';
+import { SolanaWallet } from '@particle-network/solana-wallet';
 
-export async function getNFTs(provider: ParticleNetwork, useCache: boolean = true): Promise<IApiStandardResponse> {
-  const address = getProviderSolanaAddress(provider);
+export async function getNFTs(wallet: SolanaWallet, useCache: boolean = true): Promise<IApiStandardResponse> {
+  const address: any = wallet.publicKey()?.toBase58();
   console.log(`getNFTs:${address}`);
 
   if (!useCache) {
