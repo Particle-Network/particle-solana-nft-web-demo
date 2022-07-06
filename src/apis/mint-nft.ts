@@ -37,9 +37,10 @@ export async function mintNFT(wallet: SolanaWallet, config: any, fromData: FormD
 
   const responseMintNFT = await connectionService.rpcRequest(
     RPC_METHOD.NFT_MINT,
-    {
-      owner: address,
-    },
+    // {
+    //   owner: address,
+    // },
+    address,
     config
   );
   if (responseMintNFT.error) {
