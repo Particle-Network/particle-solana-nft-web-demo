@@ -3807,6 +3807,14 @@
     crypto-js "^4.1.1"
     uuid "^8.3.2"
 
+"@particle-network/auth@^0.4.4":
+  version "0.4.4"
+  resolved "https://registry.npmjs.org/@particle-network/auth/-/auth-0.4.4.tgz#26d350ad348330f73778fe78f58dfb70437aa20e"
+  integrity sha512-YAA0IMTdFUq97L+VhyrbGUk5WZaEzb3q3yG5DquBHpUm8Rnc2roR5Q5x4t5NvD+vIYvKlsRoF2C+PPBmOBSluA==
+  dependencies:
+    crypto-js "^4.1.1"
+    uuid "^8.3.2"
+
 "@particle-network/provider@^0.4.1":
   version "0.4.2"
   resolved "https://registry.npmjs.org/@particle-network/provider/-/provider-0.4.2.tgz#9e73a3c6654ae91ca8ce8a438abaa10676f5caa1"

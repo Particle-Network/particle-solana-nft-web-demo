@@ -34,7 +34,11 @@ export async function checkHasSetWhitelistedCreator(wallet: SolanaWallet, market
     return createApiStandardResponse(null, true);
   }
 
-  const response = await connectionService.rpcRequest(RPC_METHOD.NFT_CHECK_STORE_CREATOR_IS_ACTIVATED, marketManagerAddress, address);
+  const response = await connectionService.rpcRequest(RPC_METHOD.NFT_CHECK_STORE_CREATOR_IS_ACTIVATED, {
+    market: getMarketPDA(marketManagerAddress).toBase58(),
+    creator: address,
+  });
+
   if (response.error) {
     return createApiStandardResponse(response.error);
   }
@@ -70,7 +74,8 @@ export async function initializStoreAndSetCreator(wallet: SolanaWallet): Promise
   }
 
   if (!hasSetWhitelistedCreator) {
-    const responseSetWhitelistedCreator = await connectionService.rpcRequest(RPC_METHOD.NFT_SET_WHITE_LISTED_CREATOR, address, {
+    const responseSetWhitelistedCreator = await connectionService.rpcRequest(RPC_METHOD.NFT_SET_WHITE_LISTED_CREATOR, {
+      market: getMarketPDA(address).toBase58(),
       creator: address,
       activated: true,
     });
@@ -114,4 +119,10 @@ export function createKeyHasInitializedStore(address: string): string {
 
 export function createKeyHasSetWhitelistedCreator(address: string): string {
   return `particle_nft_market:${address}:has_set_whitelisted_creator`;
+}
+
+export function getMarketPDA(marketManager: string) {
+  const metaplexProgram = new PublicKey('p1exdMJcjVao65QdewkaZRUnU6VPSXhus9n2GzWfh98');
+
+  return PublicKey.findProgramAddressSync([Buffer.from('metaplex'), metaplexProgram.toBuffer(), new PublicKey(marketManager).toBuffer()], metaplexProgram)[0];
 }

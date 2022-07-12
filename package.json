@@ -38,7 +38,7 @@
     "@metaplex-foundation/mpl-auction-house": "^1.1.1",
     "@metaplex-foundation/mpl-token-metadata": "^1.2.5",
     "@metaplex/js": "^4.2.0",
-    "@particle-network/auth": "^0.4.2",
+    "@particle-network/auth": "^0.4.4",
     "@particle-network/provider": "^0.4.1",
     "@particle-network/solana-wallet": "^0.4.2",
     "@particle/spl-token": "npm:@solana/spl-token",

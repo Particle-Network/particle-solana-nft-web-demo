@@ -10,7 +10,10 @@ export async function updateNFT(wallet: SolanaWallet, mintAddress: string, confi
   const address: any = wallet.publicKey()?.toBase58();
   console.log(`updateNFT:${address}`, mintAddress, config);
 
-  const responseNFTUpdate = await connectionService.rpcRequest(RPC_METHOD.NFT_UPDATE, mintAddress, config);
+  const responseNFTUpdate = await connectionService.rpcRequest(RPC_METHOD.NFT_UPDATE, {
+    mint: mintAddress,
+    metadata: config,
+  });
 
   if (responseNFTUpdate.error) {
     return createApiStandardResponse(responseNFTUpdate.error);

@@ -42,7 +42,8 @@ export async function buyNFT(wallet: SolanaWallet, auctionManagerAddress: string
     return createApiStandardResponse('Auction not in started state');
   }
 
-  const responseNFTBuy = await connectionService.rpcRequest(RPC_METHOD.NFT_BUY, address, {
+  const responseNFTBuy = await connectionService.rpcRequest(RPC_METHOD.NFT_BUY, {
+    buyer: address,
     mint: auctionEntity.nft.mint,
     auctionManager: auctionManagerAddress,
   });

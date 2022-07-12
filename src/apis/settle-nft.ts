@@ -14,7 +14,8 @@ export async function settleNFT(wallet: SolanaWallet, settleUuid: string): Promi
     return createApiStandardResponse('Settle not found in local');
   }
 
-  const responseNFTSettle = await connectionService.rpcRequest(RPC_METHOD.NFT_SETTLE, address, {
+  const responseNFTSettle = await connectionService.rpcRequest(RPC_METHOD.NFT_SETTLE, {
+    address,
     mint: settleEntity.nft.mint,
     auctionManager: settleEntity.auctionManager,
   });

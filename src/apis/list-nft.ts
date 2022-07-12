@@ -33,9 +33,10 @@ export async function listNFT(wallet: SolanaWallet, marketManagerAddress: string
   }
 
   const store = await Store.getPDA(new PublicKey(marketManagerAddress));
-  const responseNFTList = await connectionService.rpcRequest(RPC_METHOD.NFT_LIST, address, {
+  const responseNFTList = await connectionService.rpcRequest(RPC_METHOD.NFT_LIST, {
+    seller: address,
     mint: mintAddress,
-    store: store.toBase58(),
+    market: store.toBase58(),
     instantSalePrice: price * LAMPORTS_PER_SOL,
   });
 
