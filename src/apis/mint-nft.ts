@@ -79,7 +79,7 @@ export async function tryAddOrUpdateNFT(address: string, nft: any) {
 
 export async function getNFTByMint(mint: PublicKey): Promise<any> {
   const metadata = await Metadata.getPDA(mint);
-  const metadataAI = await connectionService.getConnection().getAccountInfo(metadata);
+  const metadataAI = await connectionService.getConnection('recent').getAccountInfo(metadata);
   const metadataData = programs.metadata.MetadataData.deserialize(metadataAI?.data as any);
 
   const nft = {

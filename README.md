@@ -27,7 +27,7 @@ See it live on [https://web-nft-demo.particle.network](https://web-nft-demo.part
 - **Buy NFT**
 - **Settle && Withdraw**
 
-## 🔧 Run
+## 🔧 Quick Start
 
 💿 git clone the project and install the dependencies
 
@@ -53,7 +53,9 @@ yarn start
 
 ## ⚠️ Notice
 
-The demo uses **IndexedDB** to store centralized data, and if the associated database is deleted, the auction-related data will be lost. So we recommend running this demo by the **devnet** network.
+The demo uses `IndexedDB` to store centralized data, and if the associated database is deleted, the auction-related data will be lost. So we Strongly recommended running this demo by the `devnet` network.
+
+Switching networks cleans up local db, which means that transaction-related data is lost.
 
 ## 💼 Feedback
 

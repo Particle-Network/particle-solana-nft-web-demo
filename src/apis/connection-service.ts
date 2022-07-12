@@ -1,4 +1,4 @@
-import { Connection } from '@solana/web3.js';
+import { Commitment, Connection } from '@solana/web3.js';
 import { CHAIN_ID, IPFS_URL, RPC_METHOD, SOLANA_RPC_URL } from './common-types';
 import { createBasicAuthString } from './utils';
 import Axios from 'axios';
@@ -57,9 +57,9 @@ export default new (class ConnectionService {
     }
   }
 
-  public getConnection(): Connection {
+  public getConnection(commitment: Commitment = 'confirmed'): Connection {
     return new Connection(`${SOLANA_RPC_URL}?chainId=${this.chainId}`, {
-      commitment: 'confirmed',
+      commitment,
       httpHeaders: {
         Authorization: createBasicAuthString(this.projectId, this.projectClientKey),
       },

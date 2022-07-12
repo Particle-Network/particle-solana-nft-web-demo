@@ -13,3 +13,4 @@ export * from './retry-transaction';
 export * from './settle-nft';
 export * from './withdraw-wsol-account';
 export * from './common-types';
+export * from './clear-db';

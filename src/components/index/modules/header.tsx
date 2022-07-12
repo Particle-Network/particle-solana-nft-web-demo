@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Popover, message } from 'antd';
 import { connectWallet, isLogin as isLoginHandle, getUserInfo, logout } from '@/utils/index';
+import { clearDB } from '@/apis/index';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { CopyOutlined } from '@ant-design/icons';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -135,6 +136,7 @@ const Header = (props: any) => {
                   key={index}
                   className={'sub-item ' + (parseInt(item.value) == chainId ? 'activate' : '')}
                   onClick={() => {
+                    clearDB(window.solanaWallet);
                     dispatch(setChainId(parseInt(item.value)));
                     location.reload();
                   }}

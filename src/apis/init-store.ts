@@ -75,7 +75,7 @@ export async function initializStoreAndSetCreator(wallet: SolanaWallet): Promise
 
   if (!hasSetWhitelistedCreator) {
     const responseSetWhitelistedCreator = await connectionService.rpcRequest(RPC_METHOD.NFT_SET_WHITE_LISTED_CREATOR, {
-      market: getMarketPDA(address).toBase58(),
+      marketManager: address,
       creator: address,
       activated: true,
     });

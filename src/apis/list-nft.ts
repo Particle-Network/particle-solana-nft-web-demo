@@ -37,7 +37,7 @@ export async function listNFT(wallet: SolanaWallet, marketManagerAddress: string
     seller: address,
     mint: mintAddress,
     market: store.toBase58(),
-    instantSalePrice: price * LAMPORTS_PER_SOL,
+    price: price * LAMPORTS_PER_SOL,
   });
 
   if (responseNFTList.error) {
