@@ -288,7 +288,7 @@ const NftList = (props: any) => {
 
   const [onShelvesLoading, setOnShelvesLoading] = useState(false);
 
-  const address = useState<string>(window.solanaWallet.publicKey()?.toBase58());
+  const address = useState<string>(window.solanaWallet?.publicKey?.toBase58());
 
   useEffect(() => {
     if (editModelVisible && mintNFTRef.current) {
@@ -367,7 +367,7 @@ const NftList = (props: any) => {
             return false;
           }
           setOnShelvesLoading(true);
-          listNFT(window.solanaWallet, window.solanaWallet.publicKey()?.toBase58(), activateMintId, price)
+          listNFT(window.solanaWallet, window.solanaWallet?.publicKey?.toBase58(), activateMintId, price)
             .then((res) => {
               if (res.error) {
                 throw new Error(res.error);

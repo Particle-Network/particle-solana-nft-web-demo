@@ -1,4 +1,3 @@
-import { bs58 } from '@project-serum/anchor/dist/cjs/utils/bytes';
 import { PublicKey } from '@solana/web3.js';
 import { IApiStandardResponse, RPC_METHOD } from './common-types';
 import connectionService from './connection-service';
@@ -7,7 +6,7 @@ import { getNFTByMint, tryAddOrUpdateNFT } from './mint-nft';
 import { SolanaWallet } from '@particle-network/solana-wallet';
 
 export async function updateNFT(wallet: SolanaWallet, mintAddress: string, config: any): Promise<IApiStandardResponse> {
-  const address: any = wallet.publicKey()?.toBase58();
+  const address: any = wallet?.publicKey?.toBase58();
   console.log(`updateNFT:${address}`, mintAddress, config);
 
   const responseNFTUpdate = await connectionService.rpcRequest(RPC_METHOD.NFT_UPDATE, {
@@ -25,12 +24,19 @@ export async function updateNFT(wallet: SolanaWallet, mintAddress: string, confi
     return createApiStandardResponse(responseSigned.error);
   }
 
-  const responseConfirm = await connectionService.rpcRequest(RPC_METHOD.SEND_AND_CONFIRM_RAW_TRANSACTION, bs58.encode(Buffer.from(responseSigned.result?.serialize(), 'base64')), {
-    commitment: 'recent',
-  });
+  const connection = connectionService.getConnection();
+  let txId: any;
+  try {
+    txId = await connection.sendRawTransaction(responseSigned.result?.serialize());
+    console.log('txId', txId);
+  } catch (error) {
+    return createApiStandardResponse(`sendRawTransaction error: ${txId}`);
+  }
 
-  if (responseConfirm.error) {
-    return createApiStandardResponse(responseConfirm.error);
+  try {
+    await connection.confirmTransaction(txId, 'recent');
+  } catch (error) {
+    // nothing
   }
 
   const mint = new PublicKey(mintAddress);

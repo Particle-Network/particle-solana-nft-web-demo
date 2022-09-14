@@ -1,5 +1,4 @@
-import { bs58 } from '@project-serum/anchor/dist/cjs/utils/bytes';
-import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
+import { Connection, LAMPORTS_PER_SOL, PublicKey, sendAndConfirmRawTransaction } from '@solana/web3.js';
 import { createApiStandardResponse, signTransaction } from './utils';
 import { Metadata } from '@metaplex-foundation/mpl-token-metadata';
 import { programs } from '@metaplex/js';
@@ -9,7 +8,7 @@ import marketDatabase from './market-database';
 import { SolanaWallet } from '@particle-network/solana-wallet';
 
 export async function mintNFT(wallet: SolanaWallet, config: any, fromData: FormData): Promise<IApiStandardResponse> {
-  const address: any = wallet.publicKey()?.toBase58();
+  const address: any = wallet?.publicKey?.toBase58();
   console.log(`mintNFT:${address}`, config, fromData);
 
   const balance = await connectionService.getConnection().getBalance(new PublicKey(address));
@@ -49,12 +48,20 @@ export async function mintNFT(wallet: SolanaWallet, config: any, fromData: FormD
     return createApiStandardResponse(responseSigned.error);
   }
 
-  const responseConfirm = await connectionService.rpcRequest(RPC_METHOD.SEND_AND_CONFIRM_RAW_TRANSACTION, bs58.encode(Buffer.from(responseSigned.result?.serialize(), 'base64')), {
-    commitment: 'recent',
-  });
+  const connection = connectionService.getConnection();
 
-  if (responseConfirm.error) {
-    return createApiStandardResponse(responseConfirm.error);
+  let txId: any;
+  try {
+    txId = await connection.sendRawTransaction(responseSigned.result?.serialize());
+    console.log('txId', txId);
+  } catch (error) {
+    return createApiStandardResponse(`sendRawTransaction error: ${txId}`);
+  }
+
+  try {
+    await connection.confirmTransaction(txId, 'recent');
+  } catch (error) {
+    // nothing
   }
 
   const mintAddress = responseMintNFT.result.mint;

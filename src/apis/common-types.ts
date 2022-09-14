@@ -1,10 +1,10 @@
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 
-export const BASE_API_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://api.particle.network';
-export const SOLANA_RPC_URL = `${BASE_API_URL}/solana/rpc`;
-export const IPFS_URL = `${BASE_API_URL}/ipfs/upload`;
+export const BASE_IPFS_URL = process.env.NEXT_PUBLIC_IPFS_URL || 'https://api.particle.network';
+export const BASE_API_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://rpc.particle.network';
+export const SOLANA_RPC_URL = `${BASE_API_URL}/solana`;
+export const IPFS_URL = `${BASE_IPFS_URL}/ipfs/upload`;
 export const DATABASE_NAME: string = 'particle-nft-market';
-
 export const ERROR_MESSAGE_BLOCK_HASH_NOT_FOUND: string = 'failed to send transaction: Transaction simulation failed: Blockhash not found';
 
 export const NFT_LIST_ESTIMATED_FEE_LAMPORTS_COST: number = 0.0314398 * LAMPORTS_PER_SOL;

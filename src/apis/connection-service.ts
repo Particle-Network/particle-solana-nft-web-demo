@@ -58,8 +58,11 @@ export default new (class ConnectionService {
   }
 
   public getConnection(commitment: Commitment = 'confirmed'): Connection {
+    const wsEndpoint = SOLANA_RPC_URL.replace('https', 'wss').replace('http', 'ws');
+
     return new Connection(`${SOLANA_RPC_URL}?chainId=${this.chainId}`, {
       commitment,
+      wsEndpoint: `${wsEndpoint}?chainId=${this.chainId}&projectUuid=${this.projectId}&projectKey=${this.projectClientKey}`,
       httpHeaders: {
         Authorization: createBasicAuthString(this.projectId, this.projectClientKey),
       },

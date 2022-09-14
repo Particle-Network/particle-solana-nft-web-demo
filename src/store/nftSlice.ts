@@ -65,7 +65,7 @@ export const nftSlice = createSlice({
 
       if (!userInfo.address && isLoginHandle()) {
         try {
-          userInfo.address = window.solanaWallet.publicKey()?.toBase58();
+          userInfo.address = window.solanaWallet?.publicKey?.toBase58();
         } catch (error) {
           console.log(error);
         }

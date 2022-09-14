@@ -226,7 +226,7 @@ const Index = () => {
 
   useEffect(() => {
     if (isLogin) {
-      Promise.all([checkHasInitializedStore(window.solanaWallet), checkHasSetWhitelistedCreator(window.solanaWallet, window.solanaWallet.publicKey()?.toBase58())]).then((res: any) => {
+      Promise.all([checkHasInitializedStore(window.solanaWallet), checkHasSetWhitelistedCreator(window.solanaWallet, window.solanaWallet?.publicKey?.toBase58())]).then((res: any) => {
         if (typeof res.find((item: any) => !!item.error || item.result == false) != 'undefined') {
           dispatch(setHasInitializedStore(false));
         } else {

@@ -11,7 +11,7 @@ import { uniq } from 'lodash';
 import { SolanaWallet } from '@particle-network/solana-wallet';
 
 export async function buyNFT(wallet: SolanaWallet, auctionManagerAddress: string): Promise<IApiStandardResponse> {
-  const address: any = wallet.publicKey()?.toBase58();
+  const address: any = wallet?.publicKey?.toBase58();
   console.log(`buyNFT:${address}`, auctionManagerAddress);
 
   const auctionEntity = await marketDatabase.auctions.where({ auctionManager: auctionManagerAddress }).first();
@@ -96,7 +96,7 @@ export async function buyNFT(wallet: SolanaWallet, auctionManagerAddress: string
 }
 
 export async function afterBuyNFT(wallet: SolanaWallet, args: any) {
-  const address: any = wallet.publicKey()?.toBase58();
+  const address: any = wallet?.publicKey?.toBase58();
 
   await marketDatabase.auctions.where({ auctionManager: args.auctionManager }).delete();
   await tryAddOrUpdateNFT(address, args.nft);

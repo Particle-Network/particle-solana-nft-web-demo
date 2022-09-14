@@ -15,7 +15,7 @@ import { SolanaWallet } from '@particle-network/solana-wallet';
  * @param price Seller's price (sol), such as 0.1 sol
  */
 export async function listNFT(wallet: SolanaWallet, marketManagerAddress: string, mintAddress: string, price: number) {
-  const address: any = wallet.publicKey()?.toBase58();
+  const address: any = wallet?.publicKey?.toBase58();
   console.log(`listNFT:${address}`, mintAddress, price);
 
   const balance = await connectionService.getConnection().getBalance(new PublicKey(address));
@@ -95,7 +95,7 @@ export async function listNFT(wallet: SolanaWallet, marketManagerAddress: string
 }
 
 export async function afterListNFT(wallet: SolanaWallet, args: any) {
-  const address: any = wallet.publicKey()?.toBase58();
+  const address: any = wallet?.publicKey?.toBase58();
 
   await marketDatabase.nfts.where({ address, mint: args.mint }).delete();
 
@@ -130,7 +130,7 @@ export async function processTransactions(
         const transaction = Transaction.from(bs58.decode(transactions[index].serialized));
 
         const newTransaction = new Transaction().add(...transaction.instructions);
-        newTransaction.feePayer = wallet.publicKey()!;
+        newTransaction.feePayer = wallet.publicKey;
         newTransaction.recentBlockhash = blockhash;
 
         const signers = transactions[index].signers.map((s: string) => Keypair.fromSecretKey(bs58.decode(s)));
@@ -156,6 +156,7 @@ export async function processTransactions(
       signedTransactions[index] = responseSigned.result.pop();
     }
 
+    const connection = connectionService.getConnection();
     for (let index = currentProcessTransactionIndex; index < signedTransactions.length; index++) {
       const signedTransaction = signedTransactions[index];
       if (!signedTransaction) {
@@ -164,16 +165,14 @@ export async function processTransactions(
 
       currentProcessTransactionIndex = index;
 
-      const responseConfirm = await connectionService.rpcRequest(RPC_METHOD.SEND_AND_CONFIRM_RAW_TRANSACTION, bs58.encode(Buffer.from(signedTransaction?.serialize(), 'base64')), {
-        commitment: 'recent',
-      });
+      let txId: any;
+      txId = await connection.sendRawTransaction(signedTransaction?.serialize());
+      console.log('txId', txId);
 
-      console.log('confirm transaction', responseConfirm);
-
-      if (responseConfirm.error) {
-        console.error(responseConfirm.error);
-
-        throw new Error(responseConfirm.error?.data?.extraMessage?.message ?? responseConfirm.error?.message);
+      try {
+        await connection.confirmTransaction(txId, 'recent');
+      } catch (error) {
+        // nothing
       }
     }
 

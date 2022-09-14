@@ -19,7 +19,7 @@ if (!isServer()) {
       appId: process.env.NEXT_PUBLIC_PROJECT_APP_ID as string,
       // chainName: 'ethereum',
       // chainId: 42,
-      chainName: 'solana',
+      chainName: 'Solana',
       chainId,
       // rpcUrl: (process.env.NEXT_PUBLIC_BASE_URL || 'https://api.particle.network') as string,
       authUrl: (process.env.NEXT_PUBLIC_AUTH_URL || 'https://auth.particle.network') as string,
@@ -45,7 +45,7 @@ export const connectWallet = () => {
   return pn.auth
     .login()
     .then(() => {
-      return Promise.all([checkHasInitializedStore(window.solanaWallet), checkHasSetWhitelistedCreator(window.solanaWallet, window.solanaWallet.publicKey()?.toBase58())]);
+      return Promise.all([checkHasInitializedStore(window.solanaWallet), checkHasSetWhitelistedCreator(window.solanaWallet, window.solanaWallet?.publicKey?.toBase58())]);
     })
     .then((res: any) => {
       if (typeof res.find((item: any) => !!item.error || item.result == false) != 'undefined') {

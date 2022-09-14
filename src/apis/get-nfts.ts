@@ -5,7 +5,7 @@ import { createApiStandardResponse } from './utils';
 import { SolanaWallet } from '@particle-network/solana-wallet';
 
 export async function getNFTs(wallet: SolanaWallet, useCache: boolean = true): Promise<IApiStandardResponse> {
-  const address: any = wallet.publicKey()?.toBase58();
+  const address: any = wallet?.publicKey?.toBase58();
   console.log(`getNFTs:${address}`);
 
   if (!useCache) {

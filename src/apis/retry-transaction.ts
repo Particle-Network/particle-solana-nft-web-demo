@@ -8,7 +8,7 @@ import { afterBuyNFT } from './buy-nft';
 import { SolanaWallet } from '@particle-network/solana-wallet';
 
 export async function retryTransaction(wallet: SolanaWallet, retryTransactionUuid: string): Promise<IApiStandardResponse> {
-  const address: any = wallet.publicKey()?.toBase58();
+  const address: any = wallet?.publicKey?.toBase58();
   console.log(`retryTransaction:${address}`, retryTransactionUuid);
 
   const retryTransactionEntity = await marketDatabase.retryTransactions.where({ uuid: retryTransactionUuid }).first();

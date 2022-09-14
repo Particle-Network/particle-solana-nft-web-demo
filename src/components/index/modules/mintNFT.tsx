@@ -97,7 +97,7 @@ const MintNFT = forwardRef((props: Props, ref) => {
   const [fileList, setFileList] = useState<Array<UploadFile>>([]);
 
   const onChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
-    setFileList(newFileList);
+    setFileList(newFileList.map((item) => ({ ...item, status: 'done' })));
   };
 
   useImperativeHandle(ref, () => ({
